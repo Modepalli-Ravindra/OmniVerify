@@ -8,6 +8,7 @@ class VideoAnalysis(Base):
     __tablename__ = "video_analyses"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(128), nullable=True, index=True)
     video_filename = Column(String(255), nullable=False)
     video_hash_sha256 = Column(String(64), nullable=False, index=True)
     duration_seconds = Column(Float, nullable=False)

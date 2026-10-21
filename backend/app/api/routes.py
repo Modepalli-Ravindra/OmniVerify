@@ -108,7 +108,11 @@ async def upload_video(file: UploadFile = File(...)):
     )
 
 @router.post("/analyze/{video_filename}", response_model=VideoAnalysisResult)
-async def analyze_video(video_filename: str, db: Optional[Session] = Depends(get_db)):
+async def analyze_video(
+    video_filename: str,
+    db: Optional[Session] = Depends(get_db),
+    current_user: Optional[Dict[str, Any]] = Depends(get_current_user_optional)
+):
     video_path = UPLOAD_DIR / video_filename
     if not video_path.exists():
         raise HTTPException(status_code=404, detail=f"Video file '{video_filename}' not found in upload repository.")
@@ -243,7 +247,8 @@ async def analyze_video(video_filename: str, db: Optional[Session] = Depends(get
         # Persist to Neon PostgreSQL if database session is active
         if db is not None:
             try:
-                save_analysis(db, result, {"json": str(json_path), "html": str(html_path)})
+                user_id = (current_user.get("sub") or current_user.get("id")) if current_user else None
+                save_analysis(db, result, {"json": str(json_path), "html": str(html_path)}, user_id=user_id)
             except Exception as db_err:
                 # Log without crashing analysis pipeline
                 print(f"[DB WARN] Failed to save analysis to Neon PostgreSQL: {db_err}")
@@ -321,9 +326,32 @@ def get_protected_analysis_history(
 ):
     """
     Protected history endpoint enforcing valid Neon Managed Better Auth session/JWT.
+    Only returns records belonging to the authenticated user.
     """
-    history_data = get_analysis_history(db=db)
+    uid = user.get("sub") or user.get("id")
+    if db is not None:
+        try:
+            records = get_recent_analyses(db, limit=50, user_id=uid)
+            return {
+                "source": "neon_postgres",
+                "authenticated_user_id": uid,
+                "history": [
+                    {
+                        "id": r.id,
+                        "filename": r.video_filename,
+                        "verdict": r.verdict,
+                        "confidence": r.calibrated_confidence,
+                        "duration": r.duration_seconds,
+                        "processed_at": r.created_at.isoformat() if r.created_at else None
+                    }
+                    for r in records
+                ]
+            }
+        except Exception as db_err:
+            print(f"[DB WARN] Protected history query failed: {db_err}")
+
     return {
-        "authenticated_user_id": user.get("sub") or user.get("id"),
-        **history_data
+        "source": "in_memory",
+        "authenticated_user_id": uid,
+        "history": []
     }

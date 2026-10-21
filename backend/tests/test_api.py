@@ -55,3 +55,22 @@ def test_end_to_end_upload_and_analyze(tmp_path):
     html_rep = client.get(f"/api/reports/{video_filename}/html")
     assert html_rep.status_code == 200
     assert "OmniVerify Forensic Examination Dossier" in html_rep.text
+
+def test_analyze_nonexistent_video():
+    response = client.post("/api/analyze/nonexistent_dummy_video.mp4")
+    assert response.status_code == 404
+    assert "not found in upload repository" in response.json()["detail"]
+
+def test_upload_corrupted_empty_video():
+    # Create empty file
+    corrupt_filename = "empty_corrupt.mp4"
+    corrupt_path = UPLOAD_DIR / corrupt_filename
+    corrupt_path.write_bytes(b"")
+
+    try:
+        response = client.post(f"/api/analyze/{corrupt_filename}")
+        assert response.status_code == 500
+        assert any(msg in response.json()["detail"] for msg in ["OpenCV could not open video stream", "No valid visual frames"])
+    finally:
+        corrupt_path.unlink(missing_ok=True)
+

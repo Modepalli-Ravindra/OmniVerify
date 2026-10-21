@@ -6,12 +6,14 @@ from ..api.schemas import VideoAnalysisResult
 def save_analysis(
     db: Session,
     analysis: VideoAnalysisResult,
-    report_paths: Optional[Dict[str, str]] = None
+    report_paths: Optional[Dict[str, str]] = None,
+    user_id: Optional[str] = None
 ) -> VideoAnalysis:
     """
     Saves video analysis results and relational sub-entities in a single transaction.
     """
     db_analysis = VideoAnalysis(
+        user_id=user_id,
         video_filename=analysis.video_filename,
         video_hash_sha256=analysis.video_hash_sha256,
         duration_seconds=analysis.duration_seconds,
@@ -78,5 +80,8 @@ def get_analysis_by_id(db: Session, analysis_id: str) -> Optional[VideoAnalysis]
 def get_analysis_by_hash(db: Session, sha256_hash: str) -> Optional[VideoAnalysis]:
     return db.query(VideoAnalysis).filter(VideoAnalysis.video_hash_sha256 == sha256_hash).order_by(VideoAnalysis.created_at.desc()).first()
 
-def get_recent_analyses(db: Session, limit: int = 50) -> List[VideoAnalysis]:
-    return db.query(VideoAnalysis).order_by(VideoAnalysis.created_at.desc()).limit(limit).all()
+def get_recent_analyses(db: Session, limit: int = 50, user_id: Optional[str] = None) -> List[VideoAnalysis]:
+    query = db.query(VideoAnalysis)
+    if user_id is not None:
+        query = query.filter(VideoAnalysis.user_id == user_id)
+    return query.order_by(VideoAnalysis.created_at.desc()).limit(limit).all()
