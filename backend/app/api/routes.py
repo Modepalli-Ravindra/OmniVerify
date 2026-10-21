@@ -4,8 +4,9 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Dict, Any, List
-from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import FileResponse, JSONResponse
+from sqlalchemy.orm import Session
 
 from ..core.config import settings, UPLOAD_DIR, REPORTS_DIR
 from ..api.schemas import VideoUploadResponse, VideoAnalysisResult, FrameForensicSignal
@@ -17,6 +18,8 @@ from ..models.frequency_forensics import frequency_forensics
 from ..models.evidence_fusion import evidence_fusion
 from ..services.explainability import explainability_service
 from ..services.report_generator import report_generator
+from ..db.session import get_db, check_database_connection
+from ..db.crud import save_analysis, get_recent_analyses
 
 router = APIRouter()
 
@@ -31,6 +34,7 @@ def get_health():
         "title": settings.APP_TITLE,
         "academic_year": settings.ACADEMIC_YEAR,
         "version": settings.VERSION,
+        "database": check_database_connection(),
         "models": {
             "object_detector": "SSDLite-MobileNetV3 (COCO 80 classes)",
             "visual_manipulation": "Gaussian High-Pass PRNU Sensor Noise Residual",
@@ -39,6 +43,10 @@ def get_health():
             "evidence_fusion": "Calibrated Bayesian Log-Odds Head with Platt Scaling"
         }
     }
+
+@router.get("/database/status")
+def get_database_status():
+    return check_database_connection()
 
 @router.post("/upload", response_model=VideoUploadResponse)
 async def upload_video(file: UploadFile = File(...)):
@@ -75,7 +83,7 @@ async def upload_video(file: UploadFile = File(...)):
     )
 
 @router.post("/analyze/{video_filename}", response_model=VideoAnalysisResult)
-async def analyze_video(video_filename: str):
+async def analyze_video(video_filename: str, db: Optional[Session] = Depends(get_db)):
     video_path = UPLOAD_DIR / video_filename
     if not video_path.exists():
         raise HTTPException(status_code=404, detail=f"Video file '{video_filename}' not found in upload repository.")
@@ -184,8 +192,16 @@ async def analyze_video(video_filename: str):
 
         # Cache result and pre-generate reports
         ANALYSIS_CACHE[video_filename] = result
-        report_generator.generate_json_report(result)
-        report_generator.generate_html_report(result)
+        json_path = report_generator.generate_json_report(result)
+        html_path = report_generator.generate_html_report(result)
+
+        # Persist to Neon PostgreSQL if database session is active
+        if db is not None:
+            try:
+                save_analysis(db, result, {"json": str(json_path), "html": str(html_path)})
+            except Exception as db_err:
+                # Log without crashing analysis pipeline
+                print(f"[DB WARN] Failed to save analysis to Neon PostgreSQL: {db_err}")
 
         return result
 
@@ -217,14 +233,38 @@ def download_html_report(filename: str):
     return FileResponse(latest, media_type="text/html", filename=latest.name)
 
 @router.get("/history")
-def get_analysis_history():
+def get_analysis_history(db: Optional[Session] = Depends(get_db)):
+    # Prefer database records if connected
+    if db is not None:
+        try:
+            records = get_recent_analyses(db, limit=50)
+            if records:
+                return {
+                    "source": "neon_postgres",
+                    "history": [
+                        {
+                            "id": r.id,
+                            "filename": r.video_filename,
+                            "verdict": r.verdict,
+                            "confidence": r.calibrated_confidence,
+                            "duration": r.duration_seconds,
+                            "processed_at": r.created_at.isoformat() if r.created_at else None
+                        }
+                        for r in records
+                    ]
+                }
+        except Exception as db_err:
+            print(f"[DB WARN] History query failed, falling back to memory cache: {db_err}")
+
+    # Fallback to local memory cache
     history = []
     for fn, res in ANALYSIS_CACHE.items():
         history.append({
+            "id": None,
             "filename": fn,
             "verdict": res.verdict,
             "confidence": res.calibrated_confidence,
             "duration": res.duration_seconds,
             "processed_at": res.processed_at_iso
         })
-    return {"history": history}
+    return {"source": "in_memory", "history": history}
