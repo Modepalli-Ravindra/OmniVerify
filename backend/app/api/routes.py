@@ -20,6 +20,9 @@ from ..services.explainability import explainability_service
 from ..services.report_generator import report_generator
 from ..db.session import get_db, check_database_connection
 from ..db.crud import save_analysis, get_recent_analyses
+from ..services.storage import storage_service
+from ..core.auth import auth_service, get_current_user_optional, get_current_user_required
+from ..services.ai_gateway import ai_gateway_service
 
 router = APIRouter()
 
@@ -35,6 +38,9 @@ def get_health():
         "academic_year": settings.ACADEMIC_YEAR,
         "version": settings.VERSION,
         "database": check_database_connection(),
+        "storage": storage_service.check_connection(),
+        "auth": auth_service.check_status(),
+        "ai_gateway": ai_gateway_service.check_status(),
         "models": {
             "object_detector": "SSDLite-MobileNetV3 (COCO 80 classes)",
             "visual_manipulation": "Gaussian High-Pass PRNU Sensor Noise Residual",
@@ -47,6 +53,25 @@ def get_health():
 @router.get("/database/status")
 def get_database_status():
     return check_database_connection()
+
+@router.get("/storage/status")
+def get_storage_status():
+    return storage_service.check_connection()
+
+@router.get("/auth/status")
+def get_auth_status():
+    return auth_service.check_status()
+
+@router.get("/auth/me")
+def get_current_authenticated_user(user: Dict[str, Any] = Depends(get_current_user_required)):
+    return {
+        "authenticated": True,
+        "user": user
+    }
+
+@router.get("/ai-gateway/status")
+def get_ai_gateway_status():
+    return ai_gateway_service.check_status()
 
 @router.post("/upload", response_model=VideoUploadResponse)
 async def upload_video(file: UploadFile = File(...)):
@@ -190,10 +215,30 @@ async def analyze_video(video_filename: str, db: Optional[Session] = Depends(get
             processed_at_iso=datetime.now(timezone.utc).isoformat()
         )
 
-        # Cache result and pre-generate reports
-        ANALYSIS_CACHE[video_filename] = result
+        # Generate executive forensic brief via AI Gateway (with local deterministic fallback)
+        brief = ai_gateway_service.generate_executive_forensic_brief({
+            "verdict": verdict,
+            "calibrated_confidence": confidence,
+            "fusion_anomaly_score": raw_fusion_score,
+            "signal_breakdowns": [
+                {"signal": sb.signal_name, "raw": sb.raw_score, "status": sb.status}
+                for sb in breakdowns
+            ]
+        })
+        result.executive_brief = brief
+
+        # Pre-generate reports
         json_path = report_generator.generate_json_report(result)
         html_path = report_generator.generate_html_report(result)
+
+        # Upload report to Neon Object Storage if available
+        if storage_service.is_configured:
+            s3_key = f"reports/{json_path.name}"
+            if storage_service.upload_file(json_path, s3_key, content_type="application/json"):
+                result.storage_report_url = storage_service.generate_presigned_url(s3_key, expires_in=3600)
+
+        # Cache result
+        ANALYSIS_CACHE[video_filename] = result
 
         # Persist to Neon PostgreSQL if database session is active
         if db is not None:
@@ -268,3 +313,17 @@ def get_analysis_history(db: Optional[Session] = Depends(get_db)):
             "processed_at": res.processed_at_iso
         })
     return {"source": "in_memory", "history": history}
+
+@router.get("/history/protected")
+def get_protected_analysis_history(
+    user: Dict[str, Any] = Depends(get_current_user_required),
+    db: Optional[Session] = Depends(get_db)
+):
+    """
+    Protected history endpoint enforcing valid Neon Managed Better Auth session/JWT.
+    """
+    history_data = get_analysis_history(db=db)
+    return {
+        "authenticated_user_id": user.get("sub") or user.get("id"),
+        **history_data
+    }

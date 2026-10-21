@@ -65,6 +65,23 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({ analysis }) => {
           </div>
         </div>
 
+        {/* Executive Forensic Brief (Neon AI Gateway / Explainability Synthesis) */}
+        {analysis.executive_brief && (
+          <div style={{ backgroundColor: '#F0EDE4', borderRadius: '6px', padding: '10px 12px', marginBottom: '14px', border: '1px solid #E2DCD0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#004741', textTransform: 'uppercase' }}>
+                Executive Forensic Brief
+              </span>
+              <span style={{ fontSize: '10px', backgroundColor: '#004741', color: '#F0EDE4', padding: '2px 6px', borderRadius: '4px' }}>
+                {analysis.executive_brief.source === 'neon_ai_gateway' ? 'Neon AI Gateway' : 'Explainability Engine'}
+              </span>
+            </div>
+            <p style={{ fontSize: '11px', color: '#101816', margin: 0, lineHeight: '1.4' }}>
+              {analysis.executive_brief.summary}
+            </p>
+          </div>
+        )}
+
         {/* Traceable Rationale Summary */}
         <div style={{ marginBottom: '14px' }}>
           <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#004741', textTransform: 'uppercase', marginBottom: '6px' }}>
@@ -79,7 +96,7 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({ analysis }) => {
       </div>
 
       <div>
-        <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
           <button
             type="button"
             className="btn-primary"
@@ -99,6 +116,19 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({ analysis }) => {
             <FileText size={15} />
             <span>JSON</span>
           </button>
+
+          {analysis.storage_report_url && (
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => window.open(analysis.storage_report_url, '_blank')}
+              title="Download from Neon Private Object Storage"
+              style={{ borderColor: '#004741', color: '#004741' }}
+            >
+              <CheckCircle2 size={14} color="#004741" />
+              <span>S3 Vault</span>
+            </button>
+          )}
         </div>
 
         <div style={{ fontSize: '11px', color: '#64716D', marginTop: '10px', fontStyle: 'italic', lineHeight: '1.4' }}>

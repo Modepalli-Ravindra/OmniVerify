@@ -36,7 +36,8 @@ Thumbs.db
 .idea/
 .vscode/
 
-# InsForge & AI agent skills
+# InsForge & Neon & AI agent skills
+.neon
 .insforge
 .agent
 .agents
@@ -50,3 +51,4 @@ Thumbs.db
 .roo
 .trae
 .windsurf
+node_modules/

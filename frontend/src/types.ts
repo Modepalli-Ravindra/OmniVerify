@@ -57,4 +57,10 @@ export interface VideoAnalysisResult {
   traceable_explanations: string[];
   limitations_disclaimer: string;
   processed_at_iso: string;
+  executive_brief?: {
+    source: string;
+    summary: string;
+    notice: string;
+  };
+  storage_report_url?: string;
 }

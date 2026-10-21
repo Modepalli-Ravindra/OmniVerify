@@ -56,6 +56,8 @@ class VideoAnalysisResult(BaseModel):
     traceable_explanations: List[str]
     limitations_disclaimer: str
     processed_at_iso: str
+    executive_brief: Optional[Dict[str, Any]] = None
+    storage_report_url: Optional[str] = None
 
 class VideoUploadResponse(BaseModel):
     task_id: str
