@@ -1,0 +1,28 @@
+# OmniVerify — Phase A2 Component Integration & Architectural Decisions
+
+**Project Title:** Intelligent Multi-Dimensional Analysis for DeepFake Video Identification  
+**Academic Year:** 2026–27  
+
+---
+
+## 1. Upstream Component Classification & Action Taxonomy
+
+Every component audited across candidate repositories is evaluated and classified according to the Phase A2 engineering taxonomy:
+
+| Component / Subsystem | Upstream Source | OmniVerify Decision | Rationale & Justification | Dependencies & Constraints | Verification Requirement |
+|---|---|---|---|---|---|
+| **Two-Pass Bounded Frame Sampling** | `heisenberg1804/veriFi` | `REUSE WITH ADAPTATION` | Two-pass selection bounds memory by frame budget rather than video length, preventing out-of-memory crashes on long videos. Adapted to uniform anchor points with motion delta weighting. | OpenCV (`cv2`), NumPy | Verified in `test_video_processing.py` (`test_sample_frames_bounded`) |
+| **Sensor Pattern Noise (PRNU) Residual** | `heisenberg1804/veriFi` | `REUSE WITH ADAPTATION` | Gaussian high-pass filtering effectively separates sensor PRNU noise from generative smoothing. Adapted by replacing scalar coefficient with an 8x8 block-variance spatial heatmap matrix for visual localization. | SciPy, OpenCV | Verified in `test_forensics.py` (`test_visual_noise_residual`) |
+| **Gunnar-Farneback Dense Optical Flow** | `heisenberg1804/veriFi` | `REUSE WITH ADAPTATION` | Dense optical flow measures inter-frame velocity continuity. Adapted to calculate velocity standard deviation, orientation entropy, and Structural Similarity (SSIM) discrepancy without external heavy dependencies. | OpenCV (`calcOpticalFlowFarneback`), NumPy | Verified in `test_temporal_flow.py` (`test_temporal_motion_analyzer`) |
+| **Temporal Interval Boundary Tracking** | `OkanUmur/temporally-localized...` | `REUSE WITH ADAPTATION` | Adapted `start_frame`, `end_frame`, and millisecond timestamp boundary logging into an automated clustering service (`identify_suspicious_intervals`). | Pure Python, Pydantic | Verified in `test_evidence_fusion.py` (`test_suspicious_interval_grouping`) |
+| **Evaluation Metrics & Protocols** | `SCLBD/DeepfakeBench` | `USE AS A RESEARCH REFERENCE` | Leveraged standard metric definitions (ROC-AUC, ACC, FPR, F1, EER) and held-out cross-dataset validation protocols without copying heavy codebase. | Documentation only | Documented in `EvaluationTab.tsx` and `docs/goal-match-report.md` |
+| **2D DCT Frequency Analysis** | `heisenberg1804/veriFi` | `REPLACE WITH ANOTHER METHOD` | `veriFi` author explicitly noted that DCT frequency had inverted correlation and unscaled sigmoid saturation. Replaced with mathematically sound 2D Fast Fourier Transform (FFT) radial power spectrum falloff. | NumPy FFT (`np.fft.fft2`, `fftshift`) | Verified in `test_forensics.py` (`test_frequency_spectrum_analysis`) |
+| **Linear Averaging Ensemble** | `heisenberg1804/veriFi` | `REPLACE WITH ANOTHER METHOD` | Simple weighted average scores below its best single component when uncalibrated. Replaced with a Calibrated Bayesian Log-Odds Fusion Head and Platt scaling. | Math, NumPy | Verified in `test_evidence_fusion.py` (`test_evidence_fusion_*`) |
+| **MTCNN Facial Cropping Pipeline** | `heisenberg1804/veriFi` | `REPLACE WITH ANOTHER METHOD` | Face-only cropping directly violates client requirement to analyze the entire video, background context, objects, and people. Replaced with full-scene COCO 80 object detection. | SSDLite-MobileNetV3 / OpenCV | Verified in `test_object_detector.py` |
+| **CLIP ViT-L/14 & EfficientNet-B4** | `heisenberg1804/veriFi` | `DO NOT USE` | Extremely heavy download (> 1.8 GB weights), high RAM consumption, uncalibrated (EfficientNet scored 0.937 on real camera interview), and prone to hallucinated prompt alignment. | Disqualified | N/A (Excluded from CPU runtime) |
+| **LangGraph LLM Agent & Physics Reasoner** | `heisenberg1804/veriFi` | `DO NOT USE` | Requires external paid LLM API keys (OpenAI / Anthropic), violates local offline forensic requirements, and introduces non-deterministic text generation. | Disqualified | Replaced with deterministic structured report generator |
+| **DeepfakeBench Training Engine (DDP)** | `SCLBD/DeepfakeBench` | `DO NOT USE` | Multi-GPU Linux cluster requirement with CC BY-NC 4.0 license restrictions. Incompatible with Windows CPU laptop. | Disqualified | N/A (Excluded from CPU runtime) |
+| **Full-Scene Multi-Object Detector** | New OmniVerify Architecture | `IMPLEMENT NEW` | Detects people, vehicles, electronics, furniture, background structures across COCO 80 classes, tracking bounding box stability and spatial scene co-occurrence. | Torchvision / OpenCV | Verified in `test_object_detector.py` |
+| **React 18 Bento Grid Interface** | New OmniVerify Architecture | `IMPLEMENT NEW` | Responsive Bento Grid layout matching the official Cyprus Green (`#004741`) & Sand (`#F0EDE4`) palette with user-uploaded logo integration. | React, Vite, Lucide | Verified via Vite production build (`npm run build`) |
+| **FastAPI REST Application Lifecycle** | New OmniVerify Architecture | `IMPLEMENT NEW` | Production REST API with video ingestion, format guards, asynchronous processing, and streaming media endpoints. | FastAPI, Uvicorn, Pydantic | Verified in `test_api.py` |
+| **Self-Contained Forensic Dossier Generator** | New OmniVerify Architecture | `IMPLEMENT NEW` | Generates downloadable JSON machine digests and printable standalone HTML forensic dossiers with SHA-256 chain of custody and forensic disclaimers. | Python, Jinja2 / HTML | Verified in `test_api.py` |
