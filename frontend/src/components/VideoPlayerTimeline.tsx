@@ -148,7 +148,7 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
                   target.load();
                 }
               }}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             >
               {(analysis as any).video_blob_url && (
                 <source src={(analysis as any).video_blob_url} type="video/mp4" />
