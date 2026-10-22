@@ -20,6 +20,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({ size = 36, className = '',
         display: 'inline-block',
         verticalAlign: 'middle',
         flexShrink: 0,
+        filter: 'drop-shadow(0 2px 8px rgba(255, 69, 0, 0.35))',
         ...style,
       }}
     />
