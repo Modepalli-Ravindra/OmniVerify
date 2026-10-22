@@ -201,19 +201,18 @@ export const App: React.FC = () => {
 
           {/* Tab 1: Forensic Analysis */}
           {activeTab === 'analyze' && (
-            <div className="bento-grid" style={{ height: '100%', minHeight: 0 }}>
-              {!analysisResult ? (
-                <VideoUploader
-                  onAnalysisStart={handleAnalysisStart}
-                  onAnalysisComplete={handleAnalysisComplete}
-                  onError={handleError}
-                  isAnalyzing={isAnalyzing}
-                  analysisProgress={analysisProgress}
-                />
-              ) : (
-                <>
-                  <div
-                    className="bento-card col-span-12"
+            !analysisResult ? (
+              <VideoUploader
+                onAnalysisStart={handleAnalysisStart}
+                onAnalysisComplete={handleAnalysisComplete}
+                onError={handleError}
+                isAnalyzing={isAnalyzing}
+                analysisProgress={analysisProgress}
+              />
+            ) : (
+              <div className="bento-grid" style={{ height: '100%', minHeight: 0 }}>
+                <div
+                  className="bento-card col-span-12"
                     style={{
                       padding: '12px 20px',
                       flexDirection: 'row',
@@ -250,10 +249,9 @@ export const App: React.FC = () => {
                   <VerdictBanner analysis={analysisResult} />
 
                   <ForensicSignalsBento analysis={analysisResult} />
-                </>
-              )}
-            </div>
-          )}
+                </div>
+              )
+            )}
 
           {/* Tab 2: Investigation History */}
           {activeTab === 'history' && <InvestigationHistory />}
