@@ -200,58 +200,58 @@ export const App: React.FC = () => {
           )}
 
           {/* Tab 1: Forensic Analysis */}
-          {activeTab === 'analyze' && (
-            !analysisResult ? (
-              <VideoUploader
-                onAnalysisStart={handleAnalysisStart}
-                onAnalysisComplete={handleAnalysisComplete}
-                onError={handleError}
-                isAnalyzing={isAnalyzing}
-                analysisProgress={analysisProgress}
-              />
-            ) : (
-              <div className="bento-grid" style={{ height: '100%', minHeight: 0 }}>
-                <div
-                  className="bento-card col-span-12"
-                    style={{
-                      padding: '12px 20px',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      borderRadius: '12px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <Film size={18} color="var(--color-accent-mint)" />
-                      <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                        {analysisResult.video_filename}
-                      </span>
-                      <span style={{ fontSize: '12px', color: 'var(--color-muted-teal)' }}>
-                        &bull; {analysisResult.frames.length} Analyzed Frames &bull; {(analysisResult.duration_seconds || 0).toFixed(1)}s Duration
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setAnalysisResult(null)}
-                      className="btn-secondary"
-                      style={{ padding: '7px 14px', fontSize: '12px' }}
-                    >
-                      <UploadCloud size={14} />
-                      <span>Analyze Another Video</span>
-                    </button>
-                  </div>
+          {activeTab === 'analyze' && !analysisResult && (
+            <VideoUploader
+              onAnalysisStart={handleAnalysisStart}
+              onAnalysisComplete={handleAnalysisComplete}
+              onError={handleError}
+              isAnalyzing={isAnalyzing}
+              analysisProgress={analysisProgress}
+            />
+          )}
 
-                  <VideoPlayerTimeline
-                    analysis={analysisResult}
-                    selectedFrameIndex={selectedFrameIndex}
-                    onSelectFrame={setSelectedFrameIndex}
-                  />
-
-                  <VerdictBanner analysis={analysisResult} />
-
-                  <ForensicSignalsBento analysis={analysisResult} />
+          {activeTab === 'analyze' && analysisResult && (
+            <div className="bento-grid" style={{ height: '100%', minHeight: 0 }}>
+              <div
+                className="bento-card col-span-12"
+                style={{
+                  padding: '12px 20px',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderRadius: '12px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <Film size={18} color="var(--color-accent-mint)" />
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                    {analysisResult.video_filename}
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--color-muted-teal)' }}>
+                    &bull; {analysisResult.frames.length} Analyzed Frames &bull; {(analysisResult.duration_seconds || 0).toFixed(1)}s Duration
+                  </span>
                 </div>
-              )
-            )}
+                <button
+                  onClick={() => setAnalysisResult(null)}
+                  className="btn-secondary"
+                  style={{ padding: '7px 14px', fontSize: '12px' }}
+                >
+                  <UploadCloud size={14} />
+                  <span>Analyze Another Video</span>
+                </button>
+              </div>
+
+              <VideoPlayerTimeline
+                analysis={analysisResult}
+                selectedFrameIndex={selectedFrameIndex}
+                onSelectFrame={setSelectedFrameIndex}
+              />
+
+              <VerdictBanner analysis={analysisResult} />
+
+              <ForensicSignalsBento analysis={analysisResult} />
+            </div>
+          )}
 
           {/* Tab 2: Investigation History */}
           {activeTab === 'history' && <InvestigationHistory />}
