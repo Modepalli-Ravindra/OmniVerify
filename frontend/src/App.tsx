@@ -216,35 +216,37 @@ export const App: React.FC = () => {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px',
+                gap: '8px',
                 height: '100%',
+                maxHeight: '100%',
                 minHeight: 0,
+                overflow: 'hidden',
               }}
             >
               {/* Top Video Header Strip */}
               <div
                 className="bento-card"
                 style={{
-                  padding: '10px 18px',
+                  padding: '7px 16px',
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderRadius: '12px',
+                  borderRadius: '10px',
                   flexShrink: 0,
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Film size={18} color="var(--color-accent-mint)" />
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                    <Film size={17} color="var(--color-accent-mint)" />
+                    <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                       {analysisResult.video_filename}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: 'var(--color-muted-teal)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '11.5px', color: 'var(--color-muted-teal)' }}>
                     <span>&bull; {analysisResult.frames.length} Analyzed Frames</span>
                     <span>&bull; {(analysisResult.duration_seconds || 0).toFixed(1)}s Duration</span>
                     {analysisResult.video_hash_sha256 && (
-                      <span style={{ fontFamily: 'monospace', fontSize: '11px', background: 'var(--color-elevated)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: '10.5px', background: 'var(--color-elevated)', padding: '2px 7px', borderRadius: '4px', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
                         SHA: {analysisResult.video_hash_sha256.slice(0, 12)}...
                       </span>
                     )}
@@ -253,29 +255,28 @@ export const App: React.FC = () => {
                 <button
                   onClick={() => setAnalysisResult(null)}
                   className="btn-secondary"
-                  style={{ padding: '6px 14px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  style={{ padding: '5px 12px', fontSize: '11.5px', display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <UploadCloud size={14} />
+                  <UploadCloud size={13} />
                   <span>Analyze Another Video</span>
                 </button>
               </div>
 
-              {/* 2-Column Split Forensic Command View (50% - 50% Balanced Layout) */}
+              {/* 2-Column Split Forensic Command View (50% - 50% Full-Viewport Fit, ZERO SCROLL) */}
               <div
                 className="analysis-split-view"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
-                  gap: '16px',
+                  gap: '10px',
                   flex: 1,
                   minHeight: 0,
-                  overflowY: 'auto',
-                  paddingRight: '2px',
-                  paddingBottom: '10px',
+                  maxHeight: '100%',
+                  overflow: 'hidden',
                 }}
               >
                 {/* Left Column: Dedicated Square Video Monitor & Timeline */}
-                <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%', overflow: 'hidden' }}>
                   <VideoPlayerTimeline
                     analysis={analysisResult}
                     selectedFrameIndex={selectedFrameIndex}
@@ -284,7 +285,7 @@ export const App: React.FC = () => {
                 </div>
 
                 {/* Right Column: Analysis Verdict Dossier & Signal Checks */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minHeight: 0, height: '100%', overflow: 'hidden' }}>
                   <VerdictBanner analysis={analysisResult} />
                   <ForensicSignalsBento analysis={analysisResult} />
                 </div>

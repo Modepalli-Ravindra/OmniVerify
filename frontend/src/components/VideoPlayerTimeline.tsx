@@ -45,13 +45,17 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        gap: '10px',
+        gap: '6px',
+        height: '100%',
+        maxHeight: '100%',
         minHeight: 0,
+        overflow: 'hidden',
+        padding: '12px 16px',
       }}
     >
-      <div className="card-header" style={{ marginBottom: '6px', paddingBottom: '8px' }}>
+      <div className="card-header" style={{ marginBottom: '4px', paddingBottom: '6px', flexShrink: 0 }}>
         <h3 className="card-title">
-          <Eye size={18} color="var(--color-accent-mint)" />
+          <Eye size={17} color="var(--color-accent-mint)" />
           Video Player & Frame Timeline
         </h3>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -63,11 +67,11 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
               backgroundColor: viewHeatmap ? 'var(--color-primary)' : 'var(--color-secondary-bg)',
               borderColor: viewHeatmap ? 'var(--color-accent-mint)' : 'var(--color-border)',
               color: 'var(--color-text-primary)',
-              fontSize: '12px',
-              padding: '5px 11px',
+              fontSize: '11.5px',
+              padding: '4px 10px',
             }}
           >
-            <Flame size={14} color={viewHeatmap ? 'var(--color-accent-mint)' : 'var(--color-muted-teal)'} />
+            <Flame size={13} color={viewHeatmap ? 'var(--color-accent-mint)' : 'var(--color-muted-teal)'} />
             <span>{viewHeatmap ? 'Heatmap On' : 'Show Heatmap'}</span>
           </button>
 
@@ -79,17 +83,17 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
               backgroundColor: showBoundingBoxes ? 'var(--color-elevated)' : 'var(--color-secondary-bg)',
               borderColor: showBoundingBoxes ? 'var(--color-muted-teal)' : 'var(--color-border)',
               color: 'var(--color-text-primary)',
-              fontSize: '12px',
-              padding: '5px 11px',
+              fontSize: '11.5px',
+              padding: '4px 10px',
             }}
           >
-            <Layers size={14} color="var(--color-accent-mint)" />
+            <Layers size={13} color="var(--color-accent-mint)" />
             <span>Objects ({currentFrame?.detected_objects?.length || 0})</span>
           </button>
         </div>
       </div>
 
-      {/* Main Video Screen with Canvas Overlay - TRUE SQUARE (1:1) FORENSIC MONITOR */}
+      {/* Main Video Screen with Canvas Overlay - DYNAMIC 1:1 SQUARE FIT (ZERO SCROLL) */}
       <div
         style={{
           display: 'flex',
@@ -98,17 +102,19 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
           width: '100%',
           flex: '1 1 auto',
           minHeight: 0,
+          overflow: 'hidden',
         }}
       >
         <div
           className="video-container"
           style={{
             position: 'relative',
-            width: '100%',
-            maxWidth: '480px',
+            height: '100%',
+            maxHeight: 'min(410px, calc(100vh - 310px))',
             aspectRatio: '1 / 1',
+            maxWidth: '100%',
             background: '#090D0C',
-            borderRadius: '12px',
+            borderRadius: '10px',
             overflow: 'hidden',
             border: '1.5px solid var(--color-border)',
             boxShadow: 'inset 0 0 25px rgba(0, 0, 0, 0.9), 0 4px 18px rgba(0, 0, 0, 0.6)',
@@ -212,16 +218,17 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginTop: '10px',
-          padding: '8px 14px',
+          marginTop: '4px',
+          padding: '6px 12px',
           background: 'var(--color-secondary-bg)',
           border: '1px solid var(--color-border)',
-          borderRadius: '8px',
-          fontSize: '12.5px',
+          borderRadius: '6px',
+          fontSize: '11.5px',
+          flexShrink: 0,
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Clock size={15} color="var(--color-accent-mint)" />
+          <Clock size={14} color="var(--color-accent-mint)" />
           <span style={{ color: 'var(--color-text-secondary)' }}>
             Time: <b style={{ color: 'var(--color-text-primary)' }}>{currentFrame?.timestamp_formatted || '00:00.000'}</b> (Frame {currentFrame?.frame_index})
           </span>
@@ -236,7 +243,7 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
                   : currentFrame?.frame_anomaly_score > 0.40
                   ? '#F59E0B'
                   : 'var(--color-accent-mint)',
-              fontSize: '12.5px',
+              fontSize: '11.5px',
             }}
           >
             {currentFrame?.frame_anomaly_score > 0.65
@@ -252,10 +259,12 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
       <div
         style={{
           display: 'flex',
-          gap: '8px',
+          gap: '6px',
           overflowX: 'auto',
-          marginTop: '10px',
+          scrollbarWidth: 'none',
+          marginTop: '4px',
           padding: '2px 0',
+          flexShrink: 0,
         }}
       >
         {analysis.frames.map((frame, idx) => {

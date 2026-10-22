@@ -128,18 +128,22 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({ analysis }) => {
         flexDirection: 'column',
         justifyContent: 'space-between',
         borderLeft: `5px solid ${verdictColor}`,
-        padding: '16px 20px',
+        padding: '10px 14px',
+        gap: '6px',
+        flex: '1 1 auto',
+        minHeight: 0,
+        overflow: 'hidden',
       }}
     >
       <div>
-        <div className="card-header" style={{ marginBottom: '10px', paddingBottom: '8px' }}>
-          <h3 className="card-title">
-            {isReal && <ShieldCheck size={20} color="var(--color-accent-mint)" />}
-            {isManipulated && <AlertTriangle size={20} color="#F87171" />}
-            {isUncertain && <HelpCircle size={20} color="#FCD34D" />}
+        <div className="card-header" style={{ marginBottom: '6px', paddingBottom: '6px' }}>
+          <h3 className="card-title" style={{ fontSize: '13.5px' }}>
+            {isReal && <ShieldCheck size={18} color="var(--color-accent-mint)" />}
+            {isManipulated && <AlertTriangle size={18} color="#F87171" />}
+            {isUncertain && <HelpCircle size={18} color="#FCD34D" />}
             Analysis Verdict
           </h3>
-          <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+          <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
             {isReal ? 'Authentic Video' : isManipulated ? 'AI / Modified Video' : 'Needs Review'}
           </span>
         </div>
@@ -148,44 +152,44 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({ analysis }) => {
           style={{
             backgroundColor: verdictBg,
             border: `1px solid ${verdictBorder}`,
-            borderRadius: '12px',
-            padding: '12px 14px',
+            borderRadius: '8px',
+            padding: '6px 10px',
             textAlign: 'center',
-            marginBottom: '10px',
+            marginBottom: '6px',
           }}
         >
-          <div style={{ fontSize: '11px', fontWeight: 700, color: verdictColor, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+          <div style={{ fontSize: '10px', fontWeight: 700, color: verdictColor, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
             Overall Result
           </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 900, color: verdictColor, margin: '3px 0' }}>
+          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: verdictColor, margin: '1px 0' }}>
             {isReal ? 'REAL / ORIGINAL' : isManipulated ? 'FAKE / MANIPULATED' : 'UNCERTAIN'}
           </div>
-          <div style={{ fontSize: '13px', color: 'var(--color-text-primary)' }}>
+          <div style={{ fontSize: '11.5px', color: 'var(--color-text-primary)' }}>
             Confidence: <b>{(analysis.calibrated_confidence * 100).toFixed(1)}%</b>
           </div>
         </div>
 
         {/* Plain-English Explanation */}
-        <div style={{ backgroundColor: 'var(--color-elevated)', borderRadius: '10px', padding: '10px 12px', marginBottom: '10px', border: '1px solid var(--color-border)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-accent-mint)', textTransform: 'uppercase' }}>
+        <div style={{ backgroundColor: 'var(--color-elevated)', borderRadius: '8px', padding: '6px 10px', marginBottom: '6px', border: '1px solid var(--color-border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+            <span style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--color-accent-mint)', textTransform: 'uppercase' }}>
               What This Means
             </span>
-            <span style={{ fontSize: '10px', backgroundColor: 'var(--color-primary)', color: 'var(--color-text-primary)', padding: '2px 7px', borderRadius: '4px', fontWeight: 600 }}>
+            <span style={{ fontSize: '9.5px', backgroundColor: 'var(--color-primary)', color: 'var(--color-text-primary)', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
               Summary
             </span>
           </div>
-          <p style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.4 }}>
+          <p style={{ fontSize: '11.5px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.35 }}>
             {getSimpleExplanation()}
           </p>
         </div>
 
         {/* Plain-English Clues Summary */}
-        <div style={{ marginBottom: '8px' }}>
-          <h4 style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--color-accent-mint)', textTransform: 'uppercase', marginBottom: '5px' }}>
+        <div style={{ marginBottom: '4px' }}>
+          <h4 style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--color-accent-mint)', textTransform: 'uppercase', marginBottom: '3px' }}>
             Key Clues Found
           </h4>
-          <ul style={{ paddingLeft: '16px', fontSize: '12px', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '3px', margin: 0, lineHeight: 1.35 }}>
+          <ul style={{ paddingLeft: '16px', fontSize: '11px', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '2px', margin: 0, lineHeight: 1.3 }}>
             {getSimpleClues().map((clue, idx) => (
               <li key={idx}>{clue}</li>
             ))}
@@ -194,15 +198,15 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({ analysis }) => {
       </div>
 
       <div>
-        <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
           <button
             type="button"
             className="btn-primary"
             onClick={downloadHtml}
             disabled={isDownloadingHtml}
-            style={{ flex: 1, justifyContent: 'center', padding: '7px 12px', fontSize: '12px' }}
+            style={{ flex: 1, justifyContent: 'center', padding: '5px 10px', fontSize: '11.5px' }}
           >
-            {isDownloadingHtml ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            {isDownloadingHtml ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
             <span>{isDownloadingHtml ? 'Generating...' : 'Download Report'}</span>
           </button>
 
@@ -212,9 +216,9 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({ analysis }) => {
             onClick={downloadJson}
             disabled={isDownloadingJson}
             title="Download Raw Forensic JSON Data"
-            style={{ padding: '7px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            style={{ padding: '5px 10px', fontSize: '11.5px', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            {isDownloadingJson ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+            {isDownloadingJson ? <Loader2 size={13} className="animate-spin" /> : <FileText size={13} />}
             <span>{isDownloadingJson ? 'Exporting...' : 'Raw Data'}</span>
           </button>
         </div>
