@@ -76,6 +76,8 @@ class NeonStorageService:
                 "message": "Failed to connect to Neon Object Storage."
             }
 
+    check_status = check_connection
+
     def upload_file(self, local_path: Path, s3_key: str, content_type: Optional[str] = None) -> bool:
         if not self.is_configured:
             return False

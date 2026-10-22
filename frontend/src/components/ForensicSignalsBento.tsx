@@ -1,144 +1,150 @@
 import React from 'react';
-import { Activity, Radio, Waves, ShieldAlert, Cpu } from 'lucide-react';
+import { ShieldAlert, CheckCircle, Search } from 'lucide-react';
 import { VideoAnalysisResult } from '../types';
 
 interface ForensicSignalsBentoProps {
   analysis: VideoAnalysisResult;
 }
 
+// Friendly plain-English names and descriptions for signals
+const SIGNAL_FRIENDLY_INFO: Record<string, { title: string; simpleDesc: string }> = {
+  'Noise Residual': {
+    title: 'Camera Grain (Noise)',
+    simpleDesc: 'Checks if natural camera grain is present or artificially smoothed out by AI tools.',
+  },
+  'Temporal Flow': {
+    title: 'Motion & Movement',
+    simpleDesc: 'Checks if movement between frames flows smoothly and realistically without jumps.',
+  },
+  'Frequency Spectrum': {
+    title: 'AI Artifacts (Patterns)',
+    simpleDesc: 'Looks for repeating pixel grid patterns typically left behind by AI video generators.',
+  },
+  'Object Coherence': {
+    title: 'Object Stability',
+    simpleDesc: 'Checks if people, items, and backgrounds remain consistent without warping or flickering.',
+  },
+};
+
 export const ForensicSignalsBento: React.FC<ForensicSignalsBentoProps> = ({ analysis }) => {
   return (
-    <>
-      {/* 4 Individual Signal Bento Cards */}
-      <div className="bento-card col-span-12">
-        <div className="card-header">
-          <h3 className="card-title">
-            <Cpu size={18} />
-            Multi-Signal Forensic Feature Space & Evidence Fusion
-          </h3>
-          <span style={{ fontSize: '12px', color: '#64716D' }}>
-            Bayesian Log-Odds Fusion Head (Weighted Contributions)
+    <div className="bento-card col-span-12" style={{ padding: '14px 20px' }}>
+      <div className="card-header" style={{ marginBottom: '10px', paddingBottom: '8px' }}>
+        <h3 className="card-title">
+          <Search size={18} color="var(--color-accent-mint)" />
+          Detailed Detection Checks
+        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {analysis.suspicious_intervals.length > 0 ? (
+            <span style={{ fontSize: '11.5px', background: 'rgba(239, 68, 68, 0.2)', color: '#FCA5A5', padding: '3px 10px', borderRadius: '4px', border: '1px solid rgba(239, 68, 68, 0.4)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+              <ShieldAlert size={14} color="#EF4444" />
+              {analysis.suspicious_intervals.length} Suspicious Segment Flagged
+            </span>
+          ) : (
+            <span style={{ fontSize: '12px', color: 'var(--color-accent-mint)', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 600 }}>
+              <CheckCircle size={14} color="var(--color-accent-mint)" />
+              All Segments Look Natural
+            </span>
+          )}
+          <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+            Combined Analysis
           </span>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-          {analysis.signal_breakdowns.map((sb, idx) => {
-            const isAnomalous = sb.status === 'Anomalous';
-            const isSuspicious = sb.status === 'Suspicious';
-            const statusBg = isAnomalous ? '#FEE2E2' : isSuspicious ? '#FEF3C7' : '#D1FAE5';
-            const statusColor = isAnomalous ? '#991B1B' : isSuspicious ? '#92400E' : '#065F46';
-
-            return (
-              <div
-                key={idx}
-                style={{
-                  background: '#FAF9F5',
-                  border: '1px solid #E2DED5',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontWeight: 700, fontSize: '14px', color: '#004741' }}>{sb.signal_name}</span>
-                    <span
-                      style={{
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        backgroundColor: statusBg,
-                        color: statusColor,
-                      }}
-                    >
-                      {sb.status}
-                    </span>
-                  </div>
-
-                  <p style={{ fontSize: '12px', color: '#64716D', marginBottom: '12px', minHeight: '36px' }}>
-                    {sb.description}
-                  </p>
-                </div>
-
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                    <span style={{ color: '#64716D' }}>Raw Anomaly Score:</span>
-                    <span style={{ fontWeight: 700, fontFamily: 'monospace' }}>{sb.raw_score.toFixed(3)}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '8px' }}>
-                    <span style={{ color: '#64716D' }}>Ensemble Weight:</span>
-                    <span style={{ fontWeight: 700 }}>{Math.round(sb.weight * 100)}%</span>
-                  </div>
-
-                  {/* Visual Progress Bar */}
-                  <div style={{ width: '100%', height: '6px', background: '#E2DED5', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div
-                      style={{
-                        width: `${Math.min(100, sb.raw_score * 100)}%`,
-                        height: '100%',
-                        background: isAnomalous ? '#B91C1C' : isSuspicious ? '#B45309' : '#004741',
-                        borderRadius: '3px',
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
 
-      {/* Temporally Localized Suspicious Intervals Panel */}
-      <div className="bento-card col-span-12">
-        <div className="card-header">
-          <h3 className="card-title">
-            <ShieldAlert size={18} />
-            Temporally Localized Suspicious Intervals
-          </h3>
-          <span style={{ fontSize: '12px', color: '#64716D' }}>
-            Millisecond Transition Boundary Logging
-          </span>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+        {analysis.signal_breakdowns.map((sb, idx) => {
+          const isAnomalous = sb.status === 'Anomalous';
+          const isSuspicious = sb.status === 'Suspicious';
+          const statusBg = isAnomalous ? 'var(--verdict-fake-bg)' : isSuspicious ? 'var(--verdict-uncertain-bg)' : 'var(--verdict-real-bg)';
+          const statusColor = isAnomalous ? 'var(--verdict-fake-text)' : isSuspicious ? 'var(--verdict-uncertain-text)' : 'var(--verdict-real-text)';
+          const statusBorder = isAnomalous ? 'var(--verdict-fake-border)' : isSuspicious ? 'var(--verdict-uncertain-border)' : 'var(--verdict-real-border)';
 
-        {analysis.suspicious_intervals.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '14px' }}>
-            {analysis.suspicious_intervals.map((inv, idx) => (
-              <div
-                key={idx}
-                style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E2DED5',
-                  borderLeft: '4px solid #B91C1C',
-                  borderRadius: '6px',
-                  padding: '14px',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontWeight: 700, color: '#004741', fontSize: '13px' }}>
-                    {inv.start_formatted} &rarr; {inv.end_formatted} (Frames {inv.start_frame}&ndash;{inv.end_frame})
+          const friendly = SIGNAL_FRIENDLY_INFO[sb.signal_name] || {
+            title: sb.signal_name,
+            simpleDesc: sb.description,
+          };
+
+          const statusLabel = isAnomalous ? 'Artificial / Edited' : isSuspicious ? 'Suspicious' : 'Natural / Real';
+
+          return (
+            <div
+              key={idx}
+              style={{
+                background: 'var(--color-secondary-bg)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '12px',
+                padding: '12px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: '8px',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-text-primary)' }}>
+                    {friendly.title}
                   </span>
-                  <span style={{ color: '#B91C1C', fontWeight: 800, fontSize: '12px' }}>
-                    Anomaly: {inv.average_anomaly_score.toFixed(2)}
+                  <span
+                    style={{
+                      padding: '2px 7px',
+                      borderRadius: '4px',
+                      fontSize: '10.5px',
+                      fontWeight: 700,
+                      backgroundColor: statusBg,
+                      color: statusColor,
+                      border: `1px solid ${statusBorder}`,
+                    }}
+                  >
+                    {statusLabel}
                   </span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#101816', marginBottom: '4px' }}>
-                  <b>Dominant Defect:</b> {inv.primary_contributing_signal}
+
+                <p style={{ fontSize: '11.5px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                  {friendly.simpleDesc}
+                </p>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', marginBottom: '4px' }}>
+                  <span style={{ color: 'var(--color-text-secondary)' }}>
+                    Level: <b style={{ color: isAnomalous ? '#EF4444' : isSuspicious ? '#F59E0B' : 'var(--color-accent-mint)' }}>
+                      {isAnomalous ? 'High Clue' : isSuspicious ? 'Medium' : 'Natural'} ({sb.raw_score.toFixed(2)})
+                    </b>
+                  </span>
+                  <span style={{ color: 'var(--color-muted-teal)', fontWeight: 600 }}>Weight: {Math.round(sb.weight * 100)}%</span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#64716D' }}>
-                  {inv.evidence_rationale}
+
+                {/* Visual Progress Bar */}
+                <div style={{ width: '100%', height: '5px', background: 'var(--color-elevated)', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      width: `${Math.min(100, sb.raw_score * 100)}%`,
+                      height: '100%',
+                      background: isAnomalous ? '#EF4444' : isSuspicious ? '#F59E0B' : 'var(--color-primary)',
+                      borderRadius: '3px',
+                    }}
+                  />
                 </div>
               </div>
-            ))}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Flagged Segment Alert Strip */}
+      {analysis.suspicious_intervals.length > 0 && (
+        <div style={{ marginTop: '10px', padding: '8px 14px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.35)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: '#FCA5A5' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShieldAlert size={15} color="#EF4444" />
+            <span><b>Flagged Segment:</b> {analysis.suspicious_intervals[0].start_formatted} &rarr; {analysis.suspicious_intervals[0].end_formatted}</span>
           </div>
-        ) : (
-          <p style={{ color: '#64716D', fontSize: '13px', fontStyle: 'italic', padding: '12px 0' }}>
-            No anomalous temporal intervals detected above forensic tolerance threshold. Temporal velocity and frame structural similarity remain continuous.
-          </p>
-        )}
-      </div>
-    </>
+          <span style={{ color: 'var(--color-text-secondary)' }}>
+            Missing natural camera grain: The video appears artificially smoothed here.
+          </span>
+        </div>
+      )}
+    </div>
   );
 };

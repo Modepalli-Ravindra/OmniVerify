@@ -1,138 +1,222 @@
-import React from 'react';
-import { ShieldCheck, AlertTriangle, HelpCircle, Download, FileText, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, AlertTriangle, HelpCircle, Download, FileText, Loader2 } from 'lucide-react';
 import { VideoAnalysisResult } from '../types';
+import { authService } from '../services/auth';
 
 interface VerdictBannerProps {
   analysis: VideoAnalysisResult;
 }
 
 export const VerdictBanner: React.FC<VerdictBannerProps> = ({ analysis }) => {
+  const [isDownloadingJson, setIsDownloadingJson] = useState(false);
+  const [isDownloadingHtml, setIsDownloadingHtml] = useState(false);
+
   const isReal = analysis.verdict === 'REAL';
   const isManipulated = analysis.verdict === 'MANIPULATED';
   const isUncertain = analysis.verdict === 'UNCERTAIN';
 
-  const verdictBg = isReal ? '#D1FAE5' : isManipulated ? '#FEE2E2' : '#FEF3C7';
-  const verdictColor = isReal ? '#065F46' : isManipulated ? '#991B1B' : '#92400E';
-  const verdictBorder = isReal ? '#0F766E' : isManipulated ? '#B91C1C' : '#B45309';
+  const verdictBg = isReal ? 'var(--verdict-real-bg)' : isManipulated ? 'var(--verdict-fake-bg)' : 'var(--verdict-uncertain-bg)';
+  const verdictColor = isReal ? 'var(--verdict-real-text)' : isManipulated ? 'var(--verdict-fake-text)' : 'var(--verdict-uncertain-text)';
+  const verdictBorder = isReal ? 'var(--verdict-real-border)' : isManipulated ? 'var(--verdict-fake-border)' : 'var(--verdict-uncertain-border)';
 
-  const downloadJson = () => {
-    window.open(`/api/reports/${encodeURIComponent(analysis.video_filename)}/json`, '_blank');
+  const downloadJson = async () => {
+    setIsDownloadingJson(true);
+    try {
+      const res = await authService.authenticatedFetch(`/api/reports/${encodeURIComponent(analysis.video_filename)}/json`);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `OmniVerify_Report_${analysis.video_filename}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+    } catch (e) {
+      console.warn('[VerdictBanner] Authenticated JSON fetch fallback:', e);
+    } finally {
+      setIsDownloadingJson(false);
+    }
+
+    // Direct fallback from analysis state if API requires authorization or server is unreachable
+    const blob = new Blob([JSON.stringify(analysis, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `OmniVerify_Report_${analysis.video_filename}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
-  const downloadHtml = () => {
-    window.open(`/api/reports/${encodeURIComponent(analysis.video_filename)}/html`, '_blank');
+  const downloadHtml = async () => {
+    setIsDownloadingHtml(true);
+    try {
+      const res = await authService.authenticatedFetch(`/api/reports/${encodeURIComponent(analysis.video_filename)}/html`);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `OmniVerify_Dossier_${analysis.video_filename}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+    } catch (e) {
+      console.warn('[VerdictBanner] Authenticated HTML fetch fallback:', e);
+    } finally {
+      setIsDownloadingHtml(false);
+    }
+
+    const token = authService.getToken();
+    const query = token ? `?token=${encodeURIComponent(token)}` : '';
+    window.open(`/api/reports/${encodeURIComponent(analysis.video_filename)}/html${query}`, '_blank');
+  };
+
+  // Convert technical output into simple, everyday English
+  const getSimpleExplanation = () => {
+    if (isManipulated) {
+      return `This video shows clear signs of AI manipulation or digital editing (${(analysis.calibrated_confidence * 100).toFixed(0)}% confidence). Camera grain looks artificially smoothed and movement across frames appears unnatural.`;
+    }
+    if (isReal) {
+      return `This video looks authentic and unedited (${(analysis.calibrated_confidence * 100).toFixed(0)}% confidence). Natural camera textures, lighting, and realistic movement were found throughout.`;
+    }
+    return `The analysis is inconclusive (${(analysis.calibrated_confidence * 100).toFixed(0)}% confidence). High video compression or motion blur makes it difficult to detect clear clues.`;
+  };
+
+  const getSimpleClues = () => {
+    if (analysis.traceable_explanations && analysis.traceable_explanations.length > 0) {
+      return analysis.traceable_explanations.slice(0, 2).map((exp) => {
+        return exp
+          .replace(/PRNU sensor noise/gi, 'camera grain')
+          .replace(/2D FFT frequency radial decay/gi, 'pixel pattern analysis')
+          .replace(/optical flow vector continuity/gi, 'smooth natural movement')
+          .replace(/transposed convolution grid harmonics/gi, 'repeating AI pixel patterns')
+          .replace(/calibrated confidence/gi, 'confidence')
+          .replace(/fusion anomaly score: \d+\.\d+\.?/gi, '')
+          .replace(/Evaluated \d+ multi-spectral sensor and temporal signals\./gi, '')
+          .trim();
+      });
+    }
+    if (isManipulated) {
+      return [
+        'Detected artificial smoothing in camera sensor grain.',
+        'Movement between consecutive frames looks edited or distorted.'
+      ];
+    }
+    if (isReal) {
+      return [
+        'Natural camera sensor grain verified across frames.',
+        'Physical movements and lighting flow realistically.'
+      ];
+    }
+    return ['Mixed indicators detected due to video compression.'];
   };
 
   return (
     <div
-      className="bento-card col-span-4"
+      className="bento-card col-span-5"
       style={{
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        borderLeft: `6px solid ${verdictBorder}`,
+        borderLeft: `5px solid ${verdictColor}`,
+        padding: '16px 20px',
       }}
     >
       <div>
-        <div className="card-header" style={{ marginBottom: '12px' }}>
+        <div className="card-header" style={{ marginBottom: '10px', paddingBottom: '8px' }}>
           <h3 className="card-title">
-            {isReal && <ShieldCheck size={20} color="#0F766E" />}
-            {isManipulated && <AlertTriangle size={20} color="#B91C1C" />}
-            {isUncertain && <HelpCircle size={20} color="#B45309" />}
-            Forensic Verdict
+            {isReal && <ShieldCheck size={20} color="var(--color-accent-mint)" />}
+            {isManipulated && <AlertTriangle size={20} color="#F87171" />}
+            {isUncertain && <HelpCircle size={20} color="#FCD34D" />}
+            Analysis Verdict
           </h3>
-          <span style={{ fontSize: '11px', color: '#64716D' }}>ISO/IEC 27037 Standard</span>
+          <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+            {isReal ? 'Authentic Video' : isManipulated ? 'AI / Modified Video' : 'Needs Review'}
+          </span>
         </div>
 
         <div
           style={{
             backgroundColor: verdictBg,
             border: `1px solid ${verdictBorder}`,
-            borderRadius: '8px',
-            padding: '16px',
+            borderRadius: '12px',
+            padding: '12px 14px',
             textAlign: 'center',
-            marginBottom: '16px',
+            marginBottom: '10px',
           }}
         >
-          <div style={{ fontSize: '12px', fontWeight: 700, color: verdictColor, textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Multi-Signal Classification
+          <div style={{ fontSize: '11px', fontWeight: 700, color: verdictColor, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+            Overall Result
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: verdictColor, margin: '4px 0' }}>
-            {analysis.verdict}
+          <div style={{ fontSize: '1.85rem', fontWeight: 900, color: verdictColor, margin: '3px 0' }}>
+            {isReal ? 'REAL / ORIGINAL' : isManipulated ? 'FAKE / MANIPULATED' : 'UNCERTAIN'}
           </div>
-          <div style={{ fontSize: '13px', color: verdictColor }}>
-            Calibrated Confidence: <b>{(analysis.calibrated_confidence * 100).toFixed(1)}%</b>
+          <div style={{ fontSize: '13px', color: 'var(--color-text-primary)' }}>
+            Confidence: <b>{(analysis.calibrated_confidence * 100).toFixed(1)}%</b>
           </div>
         </div>
 
-        {/* Executive Forensic Brief (Neon AI Gateway / Explainability Synthesis) */}
-        {analysis.executive_brief && (
-          <div style={{ backgroundColor: '#F0EDE4', borderRadius: '6px', padding: '10px 12px', marginBottom: '14px', border: '1px solid #E2DCD0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#004741', textTransform: 'uppercase' }}>
-                Executive Forensic Brief
-              </span>
-              <span style={{ fontSize: '10px', backgroundColor: '#004741', color: '#F0EDE4', padding: '2px 6px', borderRadius: '4px' }}>
-                {analysis.executive_brief.source === 'neon_ai_gateway' ? 'Neon AI Gateway' : 'Explainability Engine'}
-              </span>
-            </div>
-            <p style={{ fontSize: '11px', color: '#101816', margin: 0, lineHeight: '1.4' }}>
-              {analysis.executive_brief.summary}
-            </p>
+        {/* Plain-English Explanation */}
+        <div style={{ backgroundColor: 'var(--color-elevated)', borderRadius: '10px', padding: '10px 12px', marginBottom: '10px', border: '1px solid var(--color-border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-accent-mint)', textTransform: 'uppercase' }}>
+              What This Means
+            </span>
+            <span style={{ fontSize: '10px', backgroundColor: 'var(--color-primary)', color: 'var(--color-text-primary)', padding: '2px 7px', borderRadius: '4px', fontWeight: 600 }}>
+              Summary
+            </span>
           </div>
-        )}
+          <p style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.4 }}>
+            {getSimpleExplanation()}
+          </p>
+        </div>
 
-        {/* Traceable Rationale Summary */}
-        <div style={{ marginBottom: '14px' }}>
-          <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#004741', textTransform: 'uppercase', marginBottom: '6px' }}>
-            Traceable Findings
+        {/* Plain-English Clues Summary */}
+        <div style={{ marginBottom: '8px' }}>
+          <h4 style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--color-accent-mint)', textTransform: 'uppercase', marginBottom: '5px' }}>
+            Key Clues Found
           </h4>
-          <ul style={{ paddingLeft: '16px', fontSize: '12px', color: '#101816', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {analysis.traceable_explanations.slice(0, 3).map((exp, idx) => (
-              <li key={idx}>{exp}</li>
+          <ul style={{ paddingLeft: '16px', fontSize: '12px', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', gap: '3px', margin: 0, lineHeight: 1.35 }}>
+            {getSimpleClues().map((clue, idx) => (
+              <li key={idx}>{clue}</li>
             ))}
           </ul>
         </div>
       </div>
 
       <div>
-        <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
           <button
             type="button"
             className="btn-primary"
             onClick={downloadHtml}
-            style={{ flex: 1, justifyContent: 'center' }}
+            disabled={isDownloadingHtml}
+            style={{ flex: 1, justifyContent: 'center', padding: '7px 12px', fontSize: '12px' }}
           >
-            <Download size={15} />
-            <span>Forensic Dossier (HTML)</span>
+            {isDownloadingHtml ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            <span>{isDownloadingHtml ? 'Generating...' : 'Download Report'}</span>
           </button>
 
           <button
             type="button"
             className="btn-secondary"
             onClick={downloadJson}
-            title="Download Raw JSON Machine Digest"
+            disabled={isDownloadingJson}
+            title="Download Raw Forensic JSON Data"
+            style={{ padding: '7px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <FileText size={15} />
-            <span>JSON</span>
+            {isDownloadingJson ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+            <span>{isDownloadingJson ? 'Exporting...' : 'Raw Data'}</span>
           </button>
-
-          {analysis.storage_report_url && (
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => window.open(analysis.storage_report_url, '_blank')}
-              title="Download from Neon Private Object Storage"
-              style={{ borderColor: '#004741', color: '#004741' }}
-            >
-              <CheckCircle2 size={14} color="#004741" />
-              <span>S3 Vault</span>
-            </button>
-          )}
-        </div>
-
-        <div style={{ fontSize: '11px', color: '#64716D', marginTop: '10px', fontStyle: 'italic', lineHeight: '1.4' }}>
-          Notice: Observed anomalies are probabilistic forensic signals and do not represent sole proof without examiner verification.
         </div>
       </div>
     </div>

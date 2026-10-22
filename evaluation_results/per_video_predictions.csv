@@ -1,0 +1,7 @@
+filename,sha256,label,source_id,split,manipulation_type,status,elapsed_ms,object_coherence,noise_residual,temporal_flow,frequency_spectrum,fusion_score,calibrated_confidence,verdict,predicted_label,error
+actor01_real.mp4,9af7810f5acea32ca9b63786db7bc1887247a77fa09254dcd5fcaca9f03f1078,0,actor01,train,pristine,success,4498.89,0.143,0.9735,0.8101,0.2802,0.592,0.56,MANIPULATED,1,
+actor02_real.mp4,2affbc557f13c93869be78ac9ecf36b2030c6339541cb825b93f2ad00a999ade,0,actor02,val,pristine,success,4834.27,0.071,1.0,0.8869,0.4,0.647,0.692,MANIPULATED,1,
+actor03_real.mp4,b0ea05edab750a7878b903657b8dddf8ef5bd2ea909f5c4054db2c6dad74b6f9,0,actor03,test,pristine,success,4918.82,0.036,0.8187,0.6757,0.3417,0.515,0.401,UNCERTAIN,0,
+actor04_fake_spectral.mp4,2ae507dc9588a76b41c4df9a500b21da5e4e4e1dafce1ad2d550c6de784984b3,1,actor04,train,frequency_grid,success,4816.13,0.107,0.7873,0.4945,0.4,0.481,0.39,UNCERTAIN,0,
+actor05_fake_noisesuppress.mp4,6ace73b89e15b0413075b69eaf6deacab8c5d2e0af283349930a204ffc05fe2f,1,actor05,val,noise_inconsistency,success,4540.09,0.107,0.0,0.2702,0.3434,0.2,0.867,REAL,0,
+actor06_fake_temporaljitter.mp4,e71d74aafdce38f22eaf9e7dc6a9e81ad7eb3a37783909a227e990cc1a4b1c82,1,actor06,test,temporal_jitter,success,4367.16,0.036,1.0,0.8786,0.4,0.639,0.659,MANIPULATED,1,

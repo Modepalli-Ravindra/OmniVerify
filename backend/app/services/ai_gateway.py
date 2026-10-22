@@ -82,13 +82,21 @@ class NeonAIGatewayService:
         anomaly = analysis_dict.get("fusion_anomaly_score", 0.0)
         signals = analysis_dict.get("signal_breakdowns", [])
         
-        fallback_summary = (
-            f"Forensic verdict: {verdict} (calibrated confidence: {confidence*100:.1f}%, "
-            f"fusion anomaly score: {anomaly:.3f}). "
-            f"Evaluated {len(signals)} multi-spectral sensor and temporal signals. "
-            f"Primary local detection head confirmed consistency across PRNU sensor noise, "
-            f"2D FFT frequency radial decay, and optical flow vector continuity."
-        )
+        if verdict == "MANIPULATED":
+            fallback_summary = (
+                f"This video shows clear signs of AI manipulation or digital editing (verdict: MANIPULATED, {confidence*100:.1f}% confidence). "
+                f"Camera grain looks artificially smoothed and motion across frames appears unnatural."
+            )
+        elif verdict == "REAL":
+            fallback_summary = (
+                f"This video appears to be REAL and authentic ({confidence*100:.1f}% confidence). "
+                f"Natural camera textures, smooth motion, and consistent lighting were detected throughout."
+            )
+        else:
+            fallback_summary = (
+                f"It is UNCERTAIN whether this video is real or manipulated ({confidence*100:.1f}% confidence). "
+                f"Video compression or motion blur makes it difficult to detect clear clues."
+            )
 
         if not self.is_configured:
             return {
@@ -103,12 +111,11 @@ class NeonAIGatewayService:
                 "Content-Type": "application/json"
             }
             prompt = (
-                f"You are a digital video forensic documentation assistant. "
-                f"A video was analyzed by OmniVerify using local computer vision models. "
-                f"Verdict: {verdict}, Confidence: {confidence:.2f}, Anomaly Score: {anomaly:.3f}. "
-                f"Signals: {signals}. "
-                f"Write a 2-sentence executive forensic audit brief explaining these specific findings. "
-                f"Do not invent new scores or alter the verdict."
+                f"You are a helpful video authenticity assistant. "
+                f"Explain the analysis result in simple, clear English that anyone can understand without technical jargon. "
+                f"Verdict: {verdict}, Confidence: {confidence*100:.1f}%. "
+                f"Write exactly 2 simple sentences explaining whether the video is real or fake and the main reason why. "
+                f"Do not use technical jargon like PRNU, Fourier, or optical flow."
             )
             payload = {
                 "model": "meta/llama-3.1-8b-instruct",

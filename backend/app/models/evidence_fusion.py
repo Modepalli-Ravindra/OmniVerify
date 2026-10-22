@@ -4,11 +4,23 @@ from typing import Dict, Any, List, Tuple
 from ..core.config import settings
 from ..api.schemas import SignalBreakdown
 
-class CalibratedEvidenceFusion:
+class HeuristicEvidenceFusion:
     """
-    Combines independent forensic signals (Scene Object Coherence, Noise Residual,
-    Temporal Motion Inconsistency, Frequency Domain Spectrum) using a calibrated
-    Bayesian log-odds fusion head and Platt scaling to produce defensible Real / Uncertain / Manipulated verdicts.
+    Combines multi-modal forensic signals (Scene Object Coherence, Noise Residual,
+    Temporal Motion Inconsistency, Frequency Domain Spectrum) using a heuristic weighted
+    log-odds score fusion head with adjustable decision thresholds.
+
+    SCIENTIFIC NOTE & AUDIT QUALIFICATION (Phase C):
+    This fusion head uses an additive log-odds formula with fixed heuristic weights.
+    It is NOT an empirically validated Bayesian classifier because:
+    1. The weights are fixed engineering hyperparameters rather than trained log-likelihood ratios ln(P(E|M)/P(E|R)).
+    2. Input signal scores represent heuristic anomaly indicators, not calibrated class-conditional probabilities.
+    3. The conditional independence assumption (Naive Bayes) does not strictly hold across compressed video frames
+       (e.g., lossy H.264/HEVC compression simultaneously impacts noise residuals, frequency power spectra, and SSIM).
+    4. The prior offset (-0.15) and scaling parameter (1.10) are manually assigned rather than fitted via logistic regression
+       (Platt scaling) on held-out empirical calibration data.
+    
+    The resulting output confidence reflects a heuristic decision distance rather than a true frequentist or Bayesian posterior.
     """
     def __init__(self):
         self.weights = {
@@ -17,7 +29,7 @@ class CalibratedEvidenceFusion:
             "temporal_flow": settings.WEIGHT_TEMPORAL_FLOW,
             "frequency_spectrum": settings.WEIGHT_FREQUENCY_SPECTRUM
         }
-        # Prior logit offset calibrated for balanced forensic sensitivity
+        # Heuristic prior offset and scale parameter (not fitted on training data)
         self.prior_offset = -0.15
         self.platt_scale = 1.10
 
@@ -44,10 +56,10 @@ class CalibratedEvidenceFusion:
             signal_breakdowns: List[SignalBreakdown]
         """
         signal_inputs = {
-            "object_coherence": (object_score, "Evaluates scene element stability and detection jitter across frames."),
-            "noise_residual": (noise_score, "Measures high-pass sensor noise (PRNU) variance and localized spatial smoothing."),
-            "temporal_flow": (temporal_score, "Quantifies dense optical flow acceleration and structural similarity discontinuities."),
-            "frequency_spectrum": (frequency_score, "Analyzes 2D Fourier radial power decay and transposed convolution grid harmonics.")
+            "object_coherence": (object_score, "Checks if people, items, and backgrounds stay stable without flickering or warping."),
+            "noise_residual": (noise_score, "Checks if natural camera grain is present or smoothed out by AI tools."),
+            "temporal_flow": (temporal_score, "Checks if movements between frames flow smoothly and realistically."),
+            "frequency_spectrum": (frequency_score, "Looks for repeating pixel grid patterns typical of AI video generators.")
         }
 
         weighted_logit_sum = self.prior_offset
@@ -102,5 +114,8 @@ class CalibratedEvidenceFusion:
 
         return verdict, round(confidence, 3), round(raw_weighted_avg, 3), breakdowns
 
+# Backward-compatible alias for existing service and test imports
+CalibratedEvidenceFusion = HeuristicEvidenceFusion
+
 # Global singleton
-evidence_fusion = CalibratedEvidenceFusion()
+evidence_fusion = HeuristicEvidenceFusion()

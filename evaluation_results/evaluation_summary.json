@@ -1,0 +1,382 @@
+{
+  "benchmark_name": "Pilot_Synthetic_Validation_All_6samples",
+  "provenance": {
+    "evaluation_timestamp": "2026-10-21T16:57:56.046083+00:00",
+    "git_commit": "82fbcc94c30f9fba1b5e59597231cde46ea0db0d",
+    "python_version": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "opencv_version": "5.0.0",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 140 Stepping 2, GenuineIntel",
+    "random_seed": 42,
+    "max_frames_per_video": 8
+  },
+  "runtime_stats": {
+    "mean_ms_per_video": 4662.56,
+    "median_ms_per_video": 4678.11,
+    "min_ms": 4367.16,
+    "max_ms": 4918.82,
+    "total_eval_time_sec": 27.98
+  },
+  "summary": {
+    "total_samples": 6,
+    "successful_evaluations": 6,
+    "failed_evaluations": 0,
+    "verdict_distribution": {
+      "REAL": 1,
+      "UNCERTAIN": 2,
+      "MANIPULATED": 3
+    }
+  },
+  "primary_metrics": {
+    "accuracy": 0.1667,
+    "accuracy_95ci": [
+      0.0301,
+      0.5635
+    ],
+    "precision": 0.25,
+    "precision_95ci": [
+      0.0456,
+      0.6994
+    ],
+    "recall": 0.3333,
+    "recall_95ci": [
+      0.0615,
+      0.7923
+    ],
+    "specificity": 0.0,
+    "balanced_accuracy": 0.1667,
+    "f1_score": 0.2857,
+    "roc_auc": 0.2222,
+    "roc_auc_95ci": [
+      0.0,
+      0.6667
+    ],
+    "pr_auc": 0.3417,
+    "brier_score": 0.3457,
+    "expected_calibration_error": 0.452
+  },
+  "confusion_matrix": {
+    "tp": 1,
+    "fp": 3,
+    "tn": 0,
+    "fn": 2
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.3,
+      "accuracy": 0.3333,
+      "precision": 0.4,
+      "recall": 0.6667,
+      "f1_score": 0.5
+    },
+    {
+      "threshold": 0.4,
+      "accuracy": 0.3333,
+      "precision": 0.4,
+      "recall": 0.6667,
+      "f1_score": 0.5
+    },
+    {
+      "threshold": 0.5,
+      "accuracy": 0.1667,
+      "precision": 0.25,
+      "recall": 0.3333,
+      "f1_score": 0.2857
+    },
+    {
+      "threshold": 0.6,
+      "accuracy": 0.5,
+      "precision": 0.5,
+      "recall": 0.3333,
+      "f1_score": 0.4
+    },
+    {
+      "threshold": 0.7,
+      "accuracy": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0
+    }
+  ],
+  "signal_head_comparison": {
+    "object_coherence": {
+      "roc_auc": 0.5,
+      "pr_auc": 0.3889,
+      "accuracy_at_0.50": 0.5
+    },
+    "noise_residual": {
+      "roc_auc": 0.2778,
+      "pr_auc": 0.5083,
+      "accuracy_at_0.50": 0.3333
+    },
+    "temporal_flow": {
+      "roc_auc": 0.2222,
+      "pr_auc": 0.3417,
+      "accuracy_at_0.50": 0.1667
+    },
+    "frequency_spectrum": {
+      "roc_auc": 0.7778,
+      "pr_auc": 0.7917,
+      "accuracy_at_0.50": 0.5
+    },
+    "fusion_score": {
+      "roc_auc": 0.2222,
+      "pr_auc": 0.3417,
+      "accuracy_at_0.50": 0.1667
+    }
+  },
+  "reliability_calibration": [
+    {
+      "bin_range": [
+        0.0,
+        0.1
+      ],
+      "count": 0,
+      "confidence": 0.05,
+      "accuracy": 0.0,
+      "calibration_gap": 0.0
+    },
+    {
+      "bin_range": [
+        0.1,
+        0.2
+      ],
+      "count": 0,
+      "confidence": 0.15,
+      "accuracy": 0.0,
+      "calibration_gap": 0.0
+    },
+    {
+      "bin_range": [
+        0.2,
+        0.3
+      ],
+      "count": 1,
+      "confidence": 0.2,
+      "accuracy": 1.0,
+      "calibration_gap": 0.8
+    },
+    {
+      "bin_range": [
+        0.3,
+        0.4
+      ],
+      "count": 0,
+      "confidence": 0.35,
+      "accuracy": 0.0,
+      "calibration_gap": 0.0
+    },
+    {
+      "bin_range": [
+        0.4,
+        0.5
+      ],
+      "count": 1,
+      "confidence": 0.481,
+      "accuracy": 1.0,
+      "calibration_gap": 0.519
+    },
+    {
+      "bin_range": [
+        0.5,
+        0.6
+      ],
+      "count": 2,
+      "confidence": 0.5535,
+      "accuracy": 0.0,
+      "calibration_gap": 0.5535
+    },
+    {
+      "bin_range": [
+        0.6,
+        0.7
+      ],
+      "count": 2,
+      "confidence": 0.643,
+      "accuracy": 0.5,
+      "calibration_gap": 0.143
+    },
+    {
+      "bin_range": [
+        0.7,
+        0.8
+      ],
+      "count": 0,
+      "confidence": 0.75,
+      "accuracy": 0.0,
+      "calibration_gap": 0.0
+    },
+    {
+      "bin_range": [
+        0.8,
+        0.9
+      ],
+      "count": 0,
+      "confidence": 0.85,
+      "accuracy": 0.0,
+      "calibration_gap": 0.0
+    },
+    {
+      "bin_range": [
+        0.9,
+        1.0
+      ],
+      "count": 0,
+      "confidence": 0.95,
+      "accuracy": 0.0,
+      "calibration_gap": 0.0
+    }
+  ],
+  "detailed_results": [
+    {
+      "video_path": "C:\\Users\\user\\OneDrive\\Desktop\\OmniVerify\\evaluation_pilot\\real\\actor01_real.mp4",
+      "filename": "actor01_real.mp4",
+      "sha256": "9af7810f5acea32ca9b63786db7bc1887247a77fa09254dcd5fcaca9f03f1078",
+      "label": 0,
+      "source_id": "actor01",
+      "split": "train",
+      "manipulation_type": "pristine",
+      "status": "success",
+      "elapsed_ms": 4498.89,
+      "sampled_frames": 8,
+      "total_frames": 20,
+      "fps": 15.0,
+      "duration_sec": 1.333,
+      "scores": {
+        "object_coherence": 0.143,
+        "noise_residual": 0.9735,
+        "temporal_flow": 0.8101,
+        "frequency_spectrum": 0.2802,
+        "fusion_score": 0.592,
+        "calibrated_confidence": 0.56
+      },
+      "verdict": "MANIPULATED",
+      "predicted_label": 1
+    },
+    {
+      "video_path": "C:\\Users\\user\\OneDrive\\Desktop\\OmniVerify\\evaluation_pilot\\real\\actor02_real.mp4",
+      "filename": "actor02_real.mp4",
+      "sha256": "2affbc557f13c93869be78ac9ecf36b2030c6339541cb825b93f2ad00a999ade",
+      "label": 0,
+      "source_id": "actor02",
+      "split": "val",
+      "manipulation_type": "pristine",
+      "status": "success",
+      "elapsed_ms": 4834.27,
+      "sampled_frames": 8,
+      "total_frames": 20,
+      "fps": 15.0,
+      "duration_sec": 1.333,
+      "scores": {
+        "object_coherence": 0.071,
+        "noise_residual": 1.0,
+        "temporal_flow": 0.8869,
+        "frequency_spectrum": 0.4,
+        "fusion_score": 0.647,
+        "calibrated_confidence": 0.692
+      },
+      "verdict": "MANIPULATED",
+      "predicted_label": 1
+    },
+    {
+      "video_path": "C:\\Users\\user\\OneDrive\\Desktop\\OmniVerify\\evaluation_pilot\\real\\actor03_real.mp4",
+      "filename": "actor03_real.mp4",
+      "sha256": "b0ea05edab750a7878b903657b8dddf8ef5bd2ea909f5c4054db2c6dad74b6f9",
+      "label": 0,
+      "source_id": "actor03",
+      "split": "test",
+      "manipulation_type": "pristine",
+      "status": "success",
+      "elapsed_ms": 4918.82,
+      "sampled_frames": 8,
+      "total_frames": 20,
+      "fps": 15.0,
+      "duration_sec": 1.333,
+      "scores": {
+        "object_coherence": 0.036,
+        "noise_residual": 0.8187,
+        "temporal_flow": 0.6757,
+        "frequency_spectrum": 0.3417,
+        "fusion_score": 0.515,
+        "calibrated_confidence": 0.401
+      },
+      "verdict": "UNCERTAIN",
+      "predicted_label": 0
+    },
+    {
+      "video_path": "C:\\Users\\user\\OneDrive\\Desktop\\OmniVerify\\evaluation_pilot\\fake\\actor04_fake_spectral.mp4",
+      "filename": "actor04_fake_spectral.mp4",
+      "sha256": "2ae507dc9588a76b41c4df9a500b21da5e4e4e1dafce1ad2d550c6de784984b3",
+      "label": 1,
+      "source_id": "actor04",
+      "split": "train",
+      "manipulation_type": "frequency_grid",
+      "status": "success",
+      "elapsed_ms": 4816.13,
+      "sampled_frames": 8,
+      "total_frames": 20,
+      "fps": 15.0,
+      "duration_sec": 1.333,
+      "scores": {
+        "object_coherence": 0.107,
+        "noise_residual": 0.7873,
+        "temporal_flow": 0.4945,
+        "frequency_spectrum": 0.4,
+        "fusion_score": 0.481,
+        "calibrated_confidence": 0.39
+      },
+      "verdict": "UNCERTAIN",
+      "predicted_label": 0
+    },
+    {
+      "video_path": "C:\\Users\\user\\OneDrive\\Desktop\\OmniVerify\\evaluation_pilot\\fake\\actor05_fake_noisesuppress.mp4",
+      "filename": "actor05_fake_noisesuppress.mp4",
+      "sha256": "6ace73b89e15b0413075b69eaf6deacab8c5d2e0af283349930a204ffc05fe2f",
+      "label": 1,
+      "source_id": "actor05",
+      "split": "val",
+      "manipulation_type": "noise_inconsistency",
+      "status": "success",
+      "elapsed_ms": 4540.09,
+      "sampled_frames": 8,
+      "total_frames": 20,
+      "fps": 15.0,
+      "duration_sec": 1.333,
+      "scores": {
+        "object_coherence": 0.107,
+        "noise_residual": 0.0,
+        "temporal_flow": 0.2702,
+        "frequency_spectrum": 0.3434,
+        "fusion_score": 0.2,
+        "calibrated_confidence": 0.867
+      },
+      "verdict": "REAL",
+      "predicted_label": 0
+    },
+    {
+      "video_path": "C:\\Users\\user\\OneDrive\\Desktop\\OmniVerify\\evaluation_pilot\\fake\\actor06_fake_temporaljitter.mp4",
+      "filename": "actor06_fake_temporaljitter.mp4",
+      "sha256": "e71d74aafdce38f22eaf9e7dc6a9e81ad7eb3a37783909a227e990cc1a4b1c82",
+      "label": 1,
+      "source_id": "actor06",
+      "split": "test",
+      "manipulation_type": "temporal_jitter",
+      "status": "success",
+      "elapsed_ms": 4367.16,
+      "sampled_frames": 8,
+      "total_frames": 20,
+      "fps": 15.0,
+      "duration_sec": 1.333,
+      "scores": {
+        "object_coherence": 0.036,
+        "noise_residual": 1.0,
+        "temporal_flow": 0.8786,
+        "frequency_spectrum": 0.4,
+        "fusion_score": 0.639,
+        "calibrated_confidence": 0.659
+      },
+      "verdict": "MANIPULATED",
+      "predicted_label": 1
+    }
+  ]
+}

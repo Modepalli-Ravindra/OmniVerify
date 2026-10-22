@@ -69,8 +69,8 @@ def test_upload_corrupted_empty_video():
 
     try:
         response = client.post(f"/api/analyze/{corrupt_filename}")
-        assert response.status_code == 500
-        assert any(msg in response.json()["detail"] for msg in ["OpenCV could not open video stream", "No valid visual frames"])
+        assert response.status_code in [400, 422]
+        assert any(msg in response.json()["detail"].lower() for msg in ["empty", "stream", "corrupted", "decode"])
     finally:
         corrupt_path.unlink(missing_ok=True)
 

@@ -39,11 +39,11 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
   };
 
   return (
-    <div className="bento-card col-span-8">
+    <div className="bento-card col-span-7">
       <div className="card-header">
         <h3 className="card-title">
-          <Eye size={18} />
-          Synchronized Video Canvas & Evidence Timeline
+          <Eye size={18} color="var(--color-accent-mint)" />
+          Video Player & Frame Timeline
         </h3>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
@@ -51,12 +51,15 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
             className="btn-secondary"
             onClick={() => setViewHeatmap(!viewHeatmap)}
             style={{
-              backgroundColor: viewHeatmap ? '#004741' : 'transparent',
-              color: viewHeatmap ? '#FFFFFF' : '#101816',
+              backgroundColor: viewHeatmap ? 'var(--color-primary)' : 'var(--color-secondary-bg)',
+              borderColor: viewHeatmap ? 'var(--color-accent-mint)' : 'var(--color-border)',
+              color: 'var(--color-text-primary)',
+              fontSize: '12px',
+              padding: '6px 12px',
             }}
           >
-            <Flame size={14} />
-            <span>{viewHeatmap ? 'Heatmap Active' : 'Show Spatial Heatmap'}</span>
+            <Flame size={14} color={viewHeatmap ? 'var(--color-accent-mint)' : 'var(--color-muted-teal)'} />
+            <span>{viewHeatmap ? 'Heatmap On' : 'Show Heatmap'}</span>
           </button>
 
           <button
@@ -64,17 +67,35 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
             className="btn-secondary"
             onClick={() => setShowBoundingBoxes(!showBoundingBoxes)}
             style={{
-              backgroundColor: showBoundingBoxes ? '#E6F0EE' : 'transparent',
+              backgroundColor: showBoundingBoxes ? 'var(--color-elevated)' : 'var(--color-secondary-bg)',
+              borderColor: showBoundingBoxes ? 'var(--color-muted-teal)' : 'var(--color-border)',
+              color: 'var(--color-text-primary)',
+              fontSize: '12px',
+              padding: '6px 12px',
             }}
           >
-            <Layers size={14} />
-            <span>Scene Objects ({currentFrame?.detected_objects?.length || 0})</span>
+            <Layers size={14} color="var(--color-accent-mint)" />
+            <span>Objects ({currentFrame?.detected_objects?.length || 0})</span>
           </button>
         </div>
       </div>
 
       {/* Main Video Screen with Canvas Overlay */}
-      <div className="video-container" style={{ position: 'relative' }}>
+      <div
+        className="video-container"
+        style={{
+          position: 'relative',
+          background: '#090D0C',
+          borderRadius: '10px',
+          overflow: 'hidden',
+          border: '1px solid var(--color-border)',
+          height: '275px',
+          maxHeight: '285px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         {viewHeatmap && currentFrame?.heatmap_data ? (
           <img
             src={currentFrame.heatmap_data}
@@ -83,13 +104,32 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
           />
         ) : (
           <video
+            key={analysis.video_filename}
             ref={videoRef}
-            src={`/media/${analysis.video_filename}`}
             controls
+            playsInline
+            preload="auto"
+            crossOrigin="anonymous"
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
-            style={{ width: '100%', height: '100%' }}
-          />
+            onError={(e) => {
+              console.warn('[VideoPlayer] Playback error encountered, attempting direct backend stream:', e);
+              const target = e.currentTarget;
+              const directBackendUrl = `http://127.0.0.1:8000/media/${encodeURIComponent(analysis.video_filename)}`;
+              if (target.src !== directBackendUrl) {
+                target.src = directBackendUrl;
+                target.load();
+              }
+            }}
+            style={{ width: '100%', height: '100%', maxHeight: '275px', objectFit: 'contain' }}
+          >
+            {(analysis as any).video_blob_url && (
+              <source src={(analysis as any).video_blob_url} type="video/mp4" />
+            )}
+            <source src={`/media/${encodeURIComponent(analysis.video_filename)}`} type="video/mp4" />
+            <source src={`http://127.0.0.1:8000/media/${encodeURIComponent(analysis.video_filename)}`} type="video/mp4" />
+            Your browser does not support HTML5 video playback.
+          </video>
         )}
 
         {/* Object Bounding Boxes Overlay */}
@@ -115,22 +155,23 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
                     top: `${y1 * 100}%`,
                     width: `${(x2 - x1) * 100}%`,
                     height: `${(y2 - y1) * 100}%`,
-                    border: '2px solid #004741',
-                    borderRadius: '2px',
-                    boxShadow: '0 0 6px rgba(0, 71, 65, 0.4)',
+                    border: '2px solid var(--color-accent-mint)',
+                    borderRadius: '4px',
+                    boxShadow: '0 0 8px rgba(255, 69, 0, 0.5)',
                   }}
                 >
                   <span
                     style={{
                       position: 'absolute',
-                      top: '-18px',
+                      top: '-20px',
                       left: '0',
-                      backgroundColor: '#004741',
-                      color: '#FFFFFF',
-                      fontSize: '10px',
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'var(--color-accent-mint)',
+                      fontSize: '11px',
                       fontWeight: 700,
-                      padding: '1px 6px',
-                      borderRadius: '2px',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid var(--color-muted-teal)',
                       whiteSpace: 'nowrap',
                     }}
                   >
@@ -149,62 +190,93 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginTop: '14px',
-          padding: '8px 12px',
-          background: '#FAF9F5',
-          border: '1px solid #E2DED5',
-          borderRadius: '6px',
-          fontSize: '13px',
+          marginTop: '10px',
+          padding: '8px 14px',
+          background: 'var(--color-secondary-bg)',
+          border: '1px solid var(--color-border)',
+          borderRadius: '8px',
+          fontSize: '12.5px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Clock size={15} color="#004741" />
-          <span>
-            Current Timestamp: <b>{currentFrame?.timestamp_formatted || '00:00.000'}</b> (Frame {currentFrame?.frame_index})
+          <Clock size={15} color="var(--color-accent-mint)" />
+          <span style={{ color: 'var(--color-text-secondary)' }}>
+            Time: <b style={{ color: 'var(--color-text-primary)' }}>{currentFrame?.timestamp_formatted || '00:00.000'}</b> (Frame {currentFrame?.frame_index})
           </span>
         </div>
-        <div>
-          Frame Anomaly Score:{' '}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ color: 'var(--color-text-secondary)' }}>Frame Check: </span>
           <b
             style={{
               color:
                 currentFrame?.frame_anomaly_score > 0.65
-                  ? '#B91C1C'
+                  ? '#EF4444'
                   : currentFrame?.frame_anomaly_score > 0.40
-                  ? '#B45309'
-                  : '#0F766E',
+                  ? '#F59E0B'
+                  : 'var(--color-accent-mint)',
+              fontSize: '12.5px',
             }}
           >
-            {currentFrame?.frame_anomaly_score?.toFixed(3) || '0.000'}
+            {currentFrame?.frame_anomaly_score > 0.65
+              ? `Suspicious (${currentFrame?.frame_anomaly_score.toFixed(2)})`
+              : currentFrame?.frame_anomaly_score > 0.40
+              ? `Minor Clue (${currentFrame?.frame_anomaly_score.toFixed(2)})`
+              : `Natural (${currentFrame?.frame_anomaly_score?.toFixed(2) || '0.00'})`}
           </b>
         </div>
       </div>
 
       {/* Frame Timeline Strip */}
-      <div className="timeline-track">
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          overflowX: 'auto',
+          marginTop: '10px',
+          padding: '2px 0',
+        }}
+      >
         {analysis.frames.map((frame, idx) => {
           const isSelected = idx === selectedFrameIndex;
           const markerColor =
             frame.frame_anomaly_score > 0.65
-              ? '#B91C1C'
+              ? '#EF4444'
               : frame.frame_anomaly_score > 0.40
-              ? '#B45309'
-              : '#0F766E';
+              ? '#F59E0B'
+              : 'var(--color-accent-mint)';
 
           return (
             <div
               key={frame.frame_index}
               onClick={() => handleTimelineClick(idx, frame.timestamp_ms)}
-              className={`timeline-frame-item ${isSelected ? 'selected' : ''}`}
+              style={{
+                flexShrink: 0,
+                width: '64px',
+                height: '44px',
+                borderRadius: '6px',
+                border: isSelected ? '2px solid var(--color-accent-mint)' : '1px solid var(--color-border)',
+                overflow: 'hidden',
+                cursor: 'pointer',
+                position: 'relative',
+                background: '#090D0C',
+                transition: 'border-color 0.15s ease',
+              }}
               title={`Frame ${frame.frame_index} (${frame.timestamp_formatted}) - Anomaly: ${frame.frame_anomaly_score}`}
             >
               <img
                 src={frame.thumbnail_data || ''}
                 alt={`Frame ${frame.frame_index}`}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
               <div
-                className="timeline-marker-bar"
-                style={{ backgroundColor: markerColor }}
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: '4px',
+                  backgroundColor: markerColor,
+                }}
               />
             </div>
           );

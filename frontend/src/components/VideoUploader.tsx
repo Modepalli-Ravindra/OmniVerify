@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, Film, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { authService } from '../services/auth';
 
 interface VideoUploaderProps {
   onAnalysisStart: () => void;
@@ -39,6 +40,11 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
       return;
     }
     
+    if (file.size === 0) {
+      onError('Selected video file is empty (0 bytes).');
+      return;
+    }
+
     if (file.size > 100 * 1024 * 1024) {
       onError('File exceeds maximum limit of 100MB.');
       return;
@@ -64,34 +70,45 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
 
   const executeAnalysis = async (fileToAnalyze: File) => {
     try {
+      const localBlobUrl = URL.createObjectURL(fileToAnalyze);
       onAnalysisStart();
       const formData = new FormData();
       formData.append('file', fileToAnalyze);
 
-      // Step 1: Upload
-      const uploadRes = await fetch('/api/upload', {
+      // Step 1: Upload (with auth credentials attached)
+      const uploadRes = await authService.authenticatedFetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
 
       if (!uploadRes.ok) {
-        const errData = await uploadRes.json();
-        throw new Error(errData.detail || 'Video upload failed.');
+        let errDetail = 'Video upload failed.';
+        try {
+          const errData = await uploadRes.json();
+          errDetail = errData.detail || errDetail;
+        } catch (_) {}
+        throw new Error(errDetail);
       }
 
       const uploadData = await uploadRes.json();
 
-      // Step 2: Trigger Deep Forensic Analysis
-      const analyzeRes = await fetch(`/api/analyze/${encodeURIComponent(uploadData.filename)}`, {
-        method: 'POST',
-      });
+      // Step 2: Trigger Deep Forensic Analysis (persisted to authenticated user in Neon)
+      const analyzeRes = await authService.authenticatedFetch(
+        `/api/analyze/${encodeURIComponent(uploadData.filename)}`,
+        { method: 'POST' }
+      );
 
       if (!analyzeRes.ok) {
-        const errData = await analyzeRes.json();
-        throw new Error(errData.detail || 'Forensic analysis failed.');
+        let errDetail = 'Forensic analysis failed.';
+        try {
+          const errData = await analyzeRes.json();
+          errDetail = errData.detail || errDetail;
+        } catch (_) {}
+        throw new Error(errDetail);
       }
 
       const analysisResult = await analyzeRes.json();
+      analysisResult.video_blob_url = localBlobUrl;
       onAnalysisComplete(analysisResult);
     } catch (err: any) {
       onError(err.message || 'An error occurred during video analysis.');
@@ -99,10 +116,9 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
   };
 
   const handleDemoVideo = async (demoName: string) => {
-    // Generate synthetic canvas clip client-side if no video is on disk
     try {
       onAnalysisStart();
-      const analyzeRes = await fetch(`/api/analyze/api_test_clip.mp4`, {
+      const analyzeRes = await authService.authenticatedFetch(`/api/analyze/api_test_clip.mp4`, {
         method: 'POST',
       });
       if (analyzeRes.ok) {
@@ -120,10 +136,10 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
     <div className="bento-card col-span-12">
       <div className="card-header">
         <h3 className="card-title">
-          <Film size={18} />
+          <Film size={18} color="var(--color-accent-mint)" />
           Digital Video Ingestion & Forensic Pipeline
         </h3>
-        <span style={{ fontSize: '12px', color: '#64716D' }}>
+        <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
           Supports MP4, MOV, WebM (Max 100MB)
         </span>
       </div>
@@ -134,11 +150,11 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
         onDragOver={handleDrag}
         onDrop={handleDrop}
         style={{
-          border: `2px dashed ${dragActive ? '#004741' : '#D5CFC2'}`,
-          borderRadius: '8px',
-          padding: '36px 20px',
+          border: `2px dashed ${dragActive ? 'var(--color-accent-mint)' : 'var(--color-border)'}`,
+          borderRadius: '10px',
+          padding: '24px 20px',
           textAlign: 'center',
-          backgroundColor: dragActive ? '#E6F0EE' : '#FAF9F5',
+          backgroundColor: dragActive ? 'var(--color-elevated)' : 'var(--color-secondary-bg)',
           transition: 'all 0.2s ease',
           cursor: 'pointer',
         }}
@@ -152,27 +168,28 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
           onChange={handleFileChange}
         />
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
           <div
             style={{
-              width: '56px',
-              height: '56px',
+              width: '48px',
+              height: '48px',
               borderRadius: '50%',
-              backgroundColor: '#E6F0EE',
+              backgroundColor: 'var(--color-elevated)',
+              border: '1px solid var(--color-border)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <UploadCloud size={28} color="#004741" />
+            <UploadCloud size={24} color="var(--color-accent-mint)" />
           </div>
 
           <div>
-            <p style={{ fontWeight: 600, color: '#101816', fontSize: '1rem' }}>
+            <p style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>
               Drag and drop target video file, or{' '}
-              <span style={{ color: '#004741', textDecoration: 'underline' }}>browse</span>
+              <span style={{ color: 'var(--color-accent-mint)', textDecoration: 'underline' }}>browse</span>
             </p>
-            <p style={{ fontSize: '0.8rem', color: '#64716D', marginTop: '4px' }}>
+            <p style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
               Two-pass bounded frame sampling &bull; Entire scene & object detection &bull; Frequency decomposition
             </p>
           </div>
@@ -180,19 +197,20 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
           {selectedFile && (
             <div
               style={{
-                marginTop: '12px',
-                padding: '6px 14px',
+                marginTop: '8px',
+                padding: '4px 12px',
                 borderRadius: '6px',
-                backgroundColor: '#D1FAE5',
-                color: '#065F46',
-                fontSize: '13px',
+                backgroundColor: 'var(--verdict-real-bg)',
+                border: '1px solid var(--verdict-real-border)',
+                color: 'var(--verdict-real-text)',
+                fontSize: '12px',
                 fontWeight: 600,
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
               }}
             >
-              <CheckCircle size={15} />
+              <CheckCircle size={14} />
               Selected: {selectedFile.name} ({(selectedFile.size / (1024 * 1024)).toFixed(1)} MB)
             </div>
           )}
@@ -204,9 +222,9 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginTop: '18px',
+          marginTop: '12px',
           flexWrap: 'wrap',
-          gap: '12px',
+          gap: '10px',
         }}
       >
         <div style={{ display: 'flex', gap: '10px' }}>

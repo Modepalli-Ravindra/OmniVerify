@@ -1,0 +1,7 @@
+video_path,label,source_id,split,manipulation_type,compression
+real/actor01_real.mp4,0,actor01,train,pristine,c23
+real/actor02_real.mp4,0,actor02,val,pristine,c23
+real/actor03_real.mp4,0,actor03,test,pristine,c23
+fake/actor04_fake_spectral.mp4,1,actor04,train,frequency_grid,c23
+fake/actor05_fake_noisesuppress.mp4,1,actor05,val,noise_inconsistency,c23
+fake/actor06_fake_temporaljitter.mp4,1,actor06,test,temporal_jitter,c23

@@ -58,9 +58,29 @@ class VideoAnalysisResult(BaseModel):
     processed_at_iso: str
     executive_brief: Optional[Dict[str, Any]] = None
     storage_report_url: Optional[str] = None
+    analysis_id: Optional[str] = Field(default=None, description="UUID primary key if persisted to database")
+    analysis_status: str = Field(default="completed", description="pending | processing | completed | failed")
+    user_id: Optional[str] = Field(default=None, description="Authenticated owner ID")
+    persisted_to_database: bool = Field(default=False, description="Indicates whether analysis was durably stored in PostgreSQL")
 
 class VideoUploadResponse(BaseModel):
     task_id: str
     filename: str
     status: str
     message: str
+    file_size_bytes: Optional[int] = None
+
+class AnalysisSummaryItem(BaseModel):
+    id: Optional[str] = None
+    filename: str
+    verdict: str
+    confidence: float
+    duration: float
+    processed_at: Optional[str] = None
+    persisted: bool = False
+
+class HistoryResponse(BaseModel):
+    source: str = Field(description="neon_postgres | in_memory")
+    authenticated_user_id: Optional[str] = None
+    count: int = 0
+    history: List[AnalysisSummaryItem] = []
