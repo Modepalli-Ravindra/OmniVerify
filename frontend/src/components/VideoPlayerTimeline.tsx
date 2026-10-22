@@ -93,123 +93,110 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
         </div>
       </div>
 
-      {/* Main Video Screen with Canvas Overlay - DYNAMIC 1:1 SQUARE FIT (ZERO SCROLL) */}
+      {/* Main Video Screen with Canvas Overlay - FULL CARD FILL */}
       <div
+        className="video-container"
         style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          position: 'relative',
           width: '100%',
           flex: '1 1 auto',
           minHeight: 0,
+          background: '#090D0C',
+          borderRadius: '10px',
           overflow: 'hidden',
+          border: '1.5px solid var(--color-border)',
+          boxShadow: 'inset 0 0 25px rgba(0, 0, 0, 0.9), 0 4px 18px rgba(0, 0, 0, 0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
-        <div
-          className="video-container"
-          style={{
-            position: 'relative',
-            height: '100%',
-            maxHeight: 'min(410px, calc(100vh - 310px))',
-            aspectRatio: '1 / 1',
-            maxWidth: '100%',
-            background: '#090D0C',
-            borderRadius: '10px',
-            overflow: 'hidden',
-            border: '1.5px solid var(--color-border)',
-            boxShadow: 'inset 0 0 25px rgba(0, 0, 0, 0.9), 0 4px 18px rgba(0, 0, 0, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {viewHeatmap && currentFrame?.heatmap_data ? (
-            <img
-              src={currentFrame.heatmap_data}
-              alt="Forensic Anomaly Heatmap"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
-          ) : (
-            <video
-              key={analysis.video_filename}
-              ref={videoRef}
-              controls
-              playsInline
-              preload="auto"
-              crossOrigin="anonymous"
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              onError={(e) => {
-                console.warn('[VideoPlayer] Playback error encountered, attempting direct backend stream:', e);
-                const target = e.currentTarget;
-                const directBackendUrl = `http://127.0.0.1:8000/media/${encodeURIComponent(analysis.video_filename)}`;
-                if (target.src !== directBackendUrl) {
-                  target.src = directBackendUrl;
-                  target.load();
-                }
-              }}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            >
-              {(analysis as any).video_blob_url && (
-                <source src={(analysis as any).video_blob_url} type="video/mp4" />
-              )}
-              <source src={`/media/${encodeURIComponent(analysis.video_filename)}`} type="video/mp4" />
-              <source src={`http://127.0.0.1:8000/media/${encodeURIComponent(analysis.video_filename)}`} type="video/mp4" />
-              Your browser does not support HTML5 video playback.
-            </video>
-          )}
+        {viewHeatmap && currentFrame?.heatmap_data ? (
+          <img
+            src={currentFrame.heatmap_data}
+            alt="Forensic Anomaly Heatmap"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        ) : (
+          <video
+            key={analysis.video_filename}
+            ref={videoRef}
+            controls
+            playsInline
+            preload="auto"
+            crossOrigin="anonymous"
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onError={(e) => {
+              console.warn('[VideoPlayer] Playback error encountered, attempting direct backend stream:', e);
+              const target = e.currentTarget;
+              const directBackendUrl = `http://127.0.0.1:8000/media/${encodeURIComponent(analysis.video_filename)}`;
+              if (target.src !== directBackendUrl) {
+                target.src = directBackendUrl;
+                target.load();
+              }
+            }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          >
+            {(analysis as any).video_blob_url && (
+              <source src={(analysis as any).video_blob_url} type="video/mp4" />
+            )}
+            <source src={`/media/${encodeURIComponent(analysis.video_filename)}`} type="video/mp4" />
+            <source src={`http://127.0.0.1:8000/media/${encodeURIComponent(analysis.video_filename)}`} type="video/mp4" />
+            Your browser does not support HTML5 video playback.
+          </video>
+        )}
 
-          {/* Object Bounding Boxes Overlay - Locked 1:1 on Square Viewport */}
-          {showBoundingBoxes && !viewHeatmap && currentFrame?.detected_objects && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                pointerEvents: 'none',
-              }}
-            >
-              {currentFrame.detected_objects.map((obj, i) => {
-                const [x1, y1, x2, y2] = obj.box;
-                return (
-                  <div
-                    key={i}
+        {/* Object Bounding Boxes Overlay - Locked 1:1 on Viewport */}
+        {showBoundingBoxes && !viewHeatmap && currentFrame?.detected_objects && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+            }}
+          >
+            {currentFrame.detected_objects.map((obj, i) => {
+              const [x1, y1, x2, y2] = obj.box;
+              return (
+                <div
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    left: `${x1 * 100}%`,
+                    top: `${y1 * 100}%`,
+                    width: `${(x2 - x1) * 100}%`,
+                    height: `${(y2 - y1) * 100}%`,
+                    border: '2px solid var(--color-accent-mint)',
+                    borderRadius: '4px',
+                    boxShadow: '0 0 10px rgba(255, 69, 0, 0.6)',
+                  }}
+                >
+                  <span
                     style={{
                       position: 'absolute',
-                      left: `${x1 * 100}%`,
-                      top: `${y1 * 100}%`,
-                      width: `${(x2 - x1) * 100}%`,
-                      height: `${(y2 - y1) * 100}%`,
-                      border: '2px solid var(--color-accent-mint)',
+                      top: '-20px',
+                      left: '0',
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'var(--color-accent-mint)',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      padding: '2px 8px',
                       borderRadius: '4px',
-                      boxShadow: '0 0 10px rgba(255, 69, 0, 0.6)',
+                      border: '1px solid var(--color-muted-teal)',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '-20px',
-                        left: '0',
-                        backgroundColor: 'var(--color-primary)',
-                        color: 'var(--color-accent-mint)',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        border: '1px solid var(--color-muted-teal)',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {obj.label} ({Math.round(obj.confidence * 100)}%)
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                    {obj.label} ({Math.round(obj.confidence * 100)}%)
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Frame Inspection Details Header */}
