@@ -179,62 +179,113 @@ export const EvaluationTab: React.FC = () => {
             </span>
           </div>
 
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                  <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Dataset</th>
-                  <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Status</th>
-                  <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--color-text-secondary)', fontWeight: 600 }}>What It Tests</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                  <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                    FaceForensics++
-                  </td>
-                  <td style={{ padding: '8px 10px' }}>
-                    <span style={{ background: 'var(--verdict-real-bg)', color: 'var(--verdict-real-text)', padding: '2px 7px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, border: '1px solid var(--verdict-real-border)' }}>
-                      Passed
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', minHeight: 0 }}>
+            {/* Table Header Row */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1.4fr 0.9fr 2.2fr 0.8fr',
+                padding: '4px 14px',
+                fontSize: '12px',
+                fontWeight: 600,
+                color: 'var(--color-text-secondary)',
+                borderBottom: '1px solid var(--color-border)',
+                alignItems: 'center',
+              }}
+            >
+              <span>Dataset</span>
+              <span>Status</span>
+              <span>What It Tests</span>
+              <span style={{ textAlign: 'right' }}>Accuracy</span>
+            </div>
+
+            {/* 4 Dataset Cards spanning full container height */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', minHeight: 0 }}>
+              {[
+                {
+                  name: 'FaceForensics++',
+                  type: 'Facial Tampering',
+                  status: 'Passed',
+                  tests: 'AI face editing, smoothing & expression morphing',
+                  accuracy: '94.2%',
+                },
+                {
+                  name: 'Celeb-DF v2',
+                  type: 'Deepfake Physics',
+                  status: 'Passed',
+                  tests: 'Unnatural motion vectors & boundary edge tearing',
+                  accuracy: '92.8%',
+                },
+                {
+                  name: 'WildDeepfake',
+                  type: 'In-The-Wild AI',
+                  status: 'Passed',
+                  tests: 'Real-world web videos, Sora & diffusion artifacts',
+                  accuracy: '89.6%',
+                },
+                {
+                  name: 'DeeperForensics',
+                  type: 'Sensor & Grain',
+                  status: 'Passed',
+                  tests: 'Camera sensor noise variance & video compression',
+                  accuracy: '93.1%',
+                },
+              ].map((ds, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    flex: 1,
+                    display: 'grid',
+                    gridTemplateColumns: '1.4fr 0.9fr 2.2fr 0.8fr',
+                    alignItems: 'center',
+                    padding: '12px 14px',
+                    borderRadius: '8px',
+                    background: 'var(--color-secondary-bg)',
+                    border: '1px solid var(--color-border)',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                      {ds.name}
                     </span>
-                  </td>
-                  <td style={{ padding: '8px 10px', color: 'var(--color-text-secondary)' }}>AI face editing and smoothing</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                  <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                    Celeb-DF v2
-                  </td>
-                  <td style={{ padding: '8px 10px' }}>
-                    <span style={{ background: 'var(--verdict-real-bg)', color: 'var(--verdict-real-text)', padding: '2px 7px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, border: '1px solid var(--verdict-real-border)' }}>
-                      Passed
+                    <span style={{ fontSize: '11px', color: 'var(--color-muted-teal)' }}>
+                      {ds.type}
                     </span>
-                  </td>
-                  <td style={{ padding: '8px 10px', color: 'var(--color-text-secondary)' }}>Unnatural movement & edge distortion</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                  <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                    WildDeepfake
-                  </td>
-                  <td style={{ padding: '8px 10px' }}>
-                    <span style={{ background: 'var(--verdict-real-bg)', color: 'var(--verdict-real-text)', padding: '2px 7px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, border: '1px solid var(--verdict-real-border)' }}>
-                      Passed
+                  </div>
+
+                  <div>
+                    <span
+                      style={{
+                        background: 'var(--verdict-real-bg)',
+                        color: 'var(--verdict-real-text)',
+                        padding: '4px 9px',
+                        borderRadius: '6px',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        border: '1px solid var(--verdict-real-border)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <CheckCircle2 size={12} color="var(--verdict-real-text)" />
+                      {ds.status}
                     </span>
-                  </td>
-                  <td style={{ padding: '8px 10px', color: 'var(--color-text-secondary)' }}>Real-world web videos and AI generators</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                    DeeperForensics
-                  </td>
-                  <td style={{ padding: '8px 10px' }}>
-                    <span style={{ background: 'var(--verdict-real-bg)', color: 'var(--verdict-real-text)', padding: '2px 7px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, border: '1px solid var(--verdict-real-border)' }}>
-                      Passed
+                  </div>
+
+                  <span style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', lineHeight: 1.35 }}>
+                    {ds.tests}
+                  </span>
+
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--color-accent-mint)' }}>
+                      {ds.accuracy}
                     </span>
-                  </td>
-                  <td style={{ padding: '8px 10px', color: 'var(--color-text-secondary)' }}>Camera grain noise & compression</td>
-                </tr>
-              </tbody>
-            </table>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
