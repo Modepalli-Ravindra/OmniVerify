@@ -260,13 +260,13 @@ export const App: React.FC = () => {
                 </button>
               </div>
 
-              {/* 2-Column Split Forensic Command View */}
+              {/* 2-Column Split Forensic Command View (50% - 50% Balanced Layout) */}
               <div
                 className="analysis-split-view"
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'minmax(380px, 440px) 1fr',
-                  gap: '14px',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '16px',
                   flex: 1,
                   minHeight: 0,
                   overflowY: 'auto',

@@ -105,7 +105,7 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
           style={{
             position: 'relative',
             width: '100%',
-            maxWidth: '380px',
+            maxWidth: '480px',
             aspectRatio: '1 / 1',
             background: '#090D0C',
             borderRadius: '12px',
