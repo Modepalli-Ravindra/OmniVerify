@@ -39,8 +39,17 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
   };
 
   return (
-    <div className="bento-card col-span-7">
-      <div className="card-header">
+    <div
+      className="bento-card"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        gap: '10px',
+        minHeight: 0,
+      }}
+    >
+      <div className="card-header" style={{ marginBottom: '6px', paddingBottom: '8px' }}>
         <h3 className="card-title">
           <Eye size={18} color="var(--color-accent-mint)" />
           Video Player & Frame Timeline
@@ -55,7 +64,7 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
               borderColor: viewHeatmap ? 'var(--color-accent-mint)' : 'var(--color-border)',
               color: 'var(--color-text-primary)',
               fontSize: '12px',
-              padding: '6px 12px',
+              padding: '5px 11px',
             }}
           >
             <Flame size={14} color={viewHeatmap ? 'var(--color-accent-mint)' : 'var(--color-muted-teal)'} />
@@ -71,7 +80,7 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
               borderColor: showBoundingBoxes ? 'var(--color-muted-teal)' : 'var(--color-border)',
               color: 'var(--color-text-primary)',
               fontSize: '12px',
-              padding: '6px 12px',
+              padding: '5px 11px',
             }}
           >
             <Layers size={14} color="var(--color-accent-mint)" />
@@ -80,108 +89,121 @@ export const VideoPlayerTimeline: React.FC<VideoPlayerTimelineProps> = ({
         </div>
       </div>
 
-      {/* Main Video Screen with Canvas Overlay */}
+      {/* Main Video Screen with Canvas Overlay - TRUE SQUARE (1:1) FORENSIC MONITOR */}
       <div
-        className="video-container"
         style={{
-          position: 'relative',
-          background: '#090D0C',
-          borderRadius: '10px',
-          overflow: 'hidden',
-          border: '1px solid var(--color-border)',
-          height: '275px',
-          maxHeight: '285px',
           display: 'flex',
-          alignItems: 'center',
           justifyContent: 'center',
+          alignItems: 'center',
+          width: '100%',
+          flex: '1 1 auto',
+          minHeight: 0,
         }}
       >
-        {viewHeatmap && currentFrame?.heatmap_data ? (
-          <img
-            src={currentFrame.heatmap_data}
-            alt="Forensic Anomaly Heatmap"
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-          />
-        ) : (
-          <video
-            key={analysis.video_filename}
-            ref={videoRef}
-            controls
-            playsInline
-            preload="auto"
-            crossOrigin="anonymous"
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onError={(e) => {
-              console.warn('[VideoPlayer] Playback error encountered, attempting direct backend stream:', e);
-              const target = e.currentTarget;
-              const directBackendUrl = `http://127.0.0.1:8000/media/${encodeURIComponent(analysis.video_filename)}`;
-              if (target.src !== directBackendUrl) {
-                target.src = directBackendUrl;
-                target.load();
-              }
-            }}
-            style={{ width: '100%', height: '100%', maxHeight: '275px', objectFit: 'contain' }}
-          >
-            {(analysis as any).video_blob_url && (
-              <source src={(analysis as any).video_blob_url} type="video/mp4" />
-            )}
-            <source src={`/media/${encodeURIComponent(analysis.video_filename)}`} type="video/mp4" />
-            <source src={`http://127.0.0.1:8000/media/${encodeURIComponent(analysis.video_filename)}`} type="video/mp4" />
-            Your browser does not support HTML5 video playback.
-          </video>
-        )}
+        <div
+          className="video-container"
+          style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '380px',
+            aspectRatio: '1 / 1',
+            background: '#090D0C',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            border: '1.5px solid var(--color-border)',
+            boxShadow: 'inset 0 0 25px rgba(0, 0, 0, 0.9), 0 4px 18px rgba(0, 0, 0, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {viewHeatmap && currentFrame?.heatmap_data ? (
+            <img
+              src={currentFrame.heatmap_data}
+              alt="Forensic Anomaly Heatmap"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          ) : (
+            <video
+              key={analysis.video_filename}
+              ref={videoRef}
+              controls
+              playsInline
+              preload="auto"
+              crossOrigin="anonymous"
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onError={(e) => {
+                console.warn('[VideoPlayer] Playback error encountered, attempting direct backend stream:', e);
+                const target = e.currentTarget;
+                const directBackendUrl = `http://127.0.0.1:8000/media/${encodeURIComponent(analysis.video_filename)}`;
+                if (target.src !== directBackendUrl) {
+                  target.src = directBackendUrl;
+                  target.load();
+                }
+              }}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+            >
+              {(analysis as any).video_blob_url && (
+                <source src={(analysis as any).video_blob_url} type="video/mp4" />
+              )}
+              <source src={`/media/${encodeURIComponent(analysis.video_filename)}`} type="video/mp4" />
+              <source src={`http://127.0.0.1:8000/media/${encodeURIComponent(analysis.video_filename)}`} type="video/mp4" />
+              Your browser does not support HTML5 video playback.
+            </video>
+          )}
 
-        {/* Object Bounding Boxes Overlay */}
-        {showBoundingBoxes && !viewHeatmap && currentFrame?.detected_objects && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              pointerEvents: 'none',
-            }}
-          >
-            {currentFrame.detected_objects.map((obj, i) => {
-              const [x1, y1, x2, y2] = obj.box;
-              return (
-                <div
-                  key={i}
-                  style={{
-                    position: 'absolute',
-                    left: `${x1 * 100}%`,
-                    top: `${y1 * 100}%`,
-                    width: `${(x2 - x1) * 100}%`,
-                    height: `${(y2 - y1) * 100}%`,
-                    border: '2px solid var(--color-accent-mint)',
-                    borderRadius: '4px',
-                    boxShadow: '0 0 8px rgba(255, 69, 0, 0.5)',
-                  }}
-                >
-                  <span
+          {/* Object Bounding Boxes Overlay - Locked 1:1 on Square Viewport */}
+          {showBoundingBoxes && !viewHeatmap && currentFrame?.detected_objects && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+              }}
+            >
+              {currentFrame.detected_objects.map((obj, i) => {
+                const [x1, y1, x2, y2] = obj.box;
+                return (
+                  <div
+                    key={i}
                     style={{
                       position: 'absolute',
-                      top: '-20px',
-                      left: '0',
-                      backgroundColor: 'var(--color-primary)',
-                      color: 'var(--color-accent-mint)',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      padding: '2px 8px',
+                      left: `${x1 * 100}%`,
+                      top: `${y1 * 100}%`,
+                      width: `${(x2 - x1) * 100}%`,
+                      height: `${(y2 - y1) * 100}%`,
+                      border: '2px solid var(--color-accent-mint)',
                       borderRadius: '4px',
-                      border: '1px solid var(--color-muted-teal)',
-                      whiteSpace: 'nowrap',
+                      boxShadow: '0 0 10px rgba(255, 69, 0, 0.6)',
                     }}
                   >
-                    {obj.label} ({Math.round(obj.confidence * 100)}%)
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-20px',
+                        left: '0',
+                        backgroundColor: 'var(--color-primary)',
+                        color: 'var(--color-accent-mint)',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid var(--color-muted-teal)',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {obj.label} ({Math.round(obj.confidence * 100)}%)
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Frame Inspection Details Header */}

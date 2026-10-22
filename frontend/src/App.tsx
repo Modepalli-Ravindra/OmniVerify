@@ -211,45 +211,84 @@ export const App: React.FC = () => {
           )}
 
           {activeTab === 'analyze' && analysisResult && (
-            <div className="bento-grid" style={{ height: '100%', minHeight: 0 }}>
+            <div
+              className="analysis-results-workspace"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                height: '100%',
+                minHeight: 0,
+              }}
+            >
+              {/* Top Video Header Strip */}
               <div
-                className="bento-card col-span-12"
+                className="bento-card"
                 style={{
-                  padding: '12px 20px',
+                  padding: '10px 18px',
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   borderRadius: '12px',
+                  flexShrink: 0,
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <Film size={18} color="var(--color-accent-mint)" />
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                    {analysisResult.video_filename}
-                  </span>
-                  <span style={{ fontSize: '12px', color: 'var(--color-muted-teal)' }}>
-                    &bull; {analysisResult.frames.length} Analyzed Frames &bull; {(analysisResult.duration_seconds || 0).toFixed(1)}s Duration
-                  </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Film size={18} color="var(--color-accent-mint)" />
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                      {analysisResult.video_filename}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: 'var(--color-muted-teal)' }}>
+                    <span>&bull; {analysisResult.frames.length} Analyzed Frames</span>
+                    <span>&bull; {(analysisResult.duration_seconds || 0).toFixed(1)}s Duration</span>
+                    {analysisResult.video_hash_sha256 && (
+                      <span style={{ fontFamily: 'monospace', fontSize: '11px', background: 'var(--color-elevated)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                        SHA: {analysisResult.video_hash_sha256.slice(0, 12)}...
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={() => setAnalysisResult(null)}
                   className="btn-secondary"
-                  style={{ padding: '7px 14px', fontSize: '12px' }}
+                  style={{ padding: '6px 14px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
                   <UploadCloud size={14} />
                   <span>Analyze Another Video</span>
                 </button>
               </div>
 
-              <VideoPlayerTimeline
-                analysis={analysisResult}
-                selectedFrameIndex={selectedFrameIndex}
-                onSelectFrame={setSelectedFrameIndex}
-              />
+              {/* 2-Column Split Forensic Command View */}
+              <div
+                className="analysis-split-view"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(380px, 440px) 1fr',
+                  gap: '14px',
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: 'auto',
+                  paddingRight: '2px',
+                  paddingBottom: '10px',
+                }}
+              >
+                {/* Left Column: Dedicated Square Video Monitor & Timeline */}
+                <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                  <VideoPlayerTimeline
+                    analysis={analysisResult}
+                    selectedFrameIndex={selectedFrameIndex}
+                    onSelectFrame={setSelectedFrameIndex}
+                  />
+                </div>
 
-              <VerdictBanner analysis={analysisResult} />
-
-              <ForensicSignalsBento analysis={analysisResult} />
+                {/* Right Column: Analysis Verdict Dossier & Signal Checks */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 }}>
+                  <VerdictBanner analysis={analysisResult} />
+                  <ForensicSignalsBento analysis={analysisResult} />
+                </div>
+              </div>
             </div>
           )}
 

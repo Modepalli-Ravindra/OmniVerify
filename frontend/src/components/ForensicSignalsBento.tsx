@@ -28,7 +28,7 @@ const SIGNAL_FRIENDLY_INFO: Record<string, { title: string; simpleDesc: string }
 
 export const ForensicSignalsBento: React.FC<ForensicSignalsBentoProps> = ({ analysis }) => {
   return (
-    <div className="bento-card col-span-12" style={{ padding: '14px 20px' }}>
+    <div className="bento-card" style={{ padding: '14px 20px' }}>
       <div className="card-header" style={{ marginBottom: '10px', paddingBottom: '8px' }}>
         <h3 className="card-title">
           <Search size={18} color="var(--color-accent-mint)" />
@@ -52,7 +52,7 @@ export const ForensicSignalsBento: React.FC<ForensicSignalsBentoProps> = ({ anal
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
         {analysis.signal_breakdowns.map((sb, idx) => {
           const isAnomalous = sb.status === 'Anomalous';
           const isSuspicious = sb.status === 'Suspicious';

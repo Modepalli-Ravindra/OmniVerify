@@ -122,7 +122,7 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({ analysis }) => {
 
   return (
     <div
-      className="bento-card col-span-5"
+      className="bento-card"
       style={{
         display: 'flex',
         flexDirection: 'column',
