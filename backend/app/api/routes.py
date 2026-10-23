@@ -3,7 +3,7 @@ import shutil
 import numpy as np
 from pathlib import Path
 from datetime import datetime, timezone
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
